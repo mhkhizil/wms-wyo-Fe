@@ -1,10 +1,12 @@
+//To modiy => zod error ko alert bar nk pya yan ,empty state mhr table size pyin yan ,modal opening closing animation htl yan ,suceess mssage twy ll tt tt yat yat pya yan
 import {
   QueryClient,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import { z } from "zod";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import {
   ColumnDef,
@@ -25,6 +27,7 @@ import {
   MdKeyboardDoubleArrowRight,
 } from "react-icons/md";
 import Loader from "../components/Loader";
+import InputModel from "../components/inputModel";
 //type of data fetching from endpoint
 export type ItemData = {
   id: string;
@@ -34,9 +37,46 @@ export type ItemData = {
   price: number;
   remark: string;
 };
+export const newItemSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  manufacturer: z.string().trim().min(1, "Manufacturer is required"),
+  category: z.string().trim().min(1, "Category is required"),
+  price: z.number().positive("Price must be positive"),
+  remark: z.string().trim().min(1, "Remark is required"),
+});
+export type NewItemData = z.infer<typeof newItemSchema>;
 const index = () => {
-  //item data state
+  //zod error handling state
+  const [zodErrors, setZodErrors] = useState<z.ZodIssue[]>([]);
+  //item data state for fetching
   const [itemData, setItemData] = useState<ItemData[]>([]);
+  //item data state for creating
+  const [newItemData, setNewItemData] = useState<NewItemData>({
+    name: "",
+    manufacturer: "",
+    category: "",
+    price: 0,
+    remark: "",
+  });
+  //input change handler
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewItemData({
+      ...newItemData,
+      [name]: name === "price" ? Number(value) : value,
+    });
+  };
+  //Modal state
+  const [isCreateItemModalOpen, setIsCreateItemModalOpen] =
+    useState<boolean>(false);
+  //modal close  function
+  const closeCreateItemModal = () => {
+    setIsCreateItemModalOpen(false);
+  };
+  //modal Open function
+  const openCreateItemModal = () => {
+    setIsCreateItemModalOpen(true);
+  };
   const queryClient = useQueryClient();
   //tanstack query for data fetching
   const { data, isLoading, isError } = useQuery<ItemData[], Error>({
@@ -62,14 +102,12 @@ const index = () => {
     }
   }, [data]);
 
-    //tanstack query for delete
-  const { mutate, error } = useMutation({
+  //tanstack query for delete
+  const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`https://api-wai.yethiha.com/items/${id}`, {
         method: "DELETE",
       });
-
-      console.log(response);
 
       if (!response.ok) {
         throw new Error("Failed to delete item");
@@ -90,8 +128,63 @@ const index = () => {
   });
   //delete handler
   const handleDelete = (id: string) => {
-    alert("Do you want to delete it ?");
-    mutate(id);
+    if (confirm("Do you want to delete this item?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+  //model  handler
+  const handleModel = () => {
+    openCreateItemModal();
+  };
+
+  //tanstack query mutation for create
+  const createMutation = useMutation({
+    mutationFn: async (newItemData: NewItemData) => {
+      const response = await fetch(`https://api-wai.yethiha.com/items`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newItemData),
+      });
+
+      console.log(response);
+
+      if (!response.ok) {
+        throw new Error("Failed to delete item");
+      }
+
+      return response;
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["items"],
+        refetchType: "active",
+      });
+      alert("Item created");
+    },
+    onError: () => {
+      alert("error:");
+    },
+  });
+  console.log(createMutation.error);
+
+  //create Handler
+  const handleCreate = (newItemData: NewItemData, e: FormEvent) => {
+    e.preventDefault();
+    const result = newItemSchema.safeParse(newItemData);
+    if (!result.success) {
+      setZodErrors(result.error.issues);
+    } else {
+      createMutation.mutate(newItemData);
+      closeCreateItemModal();
+      setNewItemData({
+        name: "",
+        manufacturer: "",
+        category: "",
+        price: 0,
+        remark: "",
+      });
+    }
   };
   //column def using tanstak table
   const columns: ColumnDef<ItemData>[] = [
@@ -144,9 +237,116 @@ const index = () => {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+  console.log(newItemData);
+  //function to get zod error msg for specific field
+  const getErrorMessage = (field: string) => {
+    const error = zodErrors.find((err) => err.path.includes(field));
+    return error ? error.message : null;
+  }; //zod error ko alert box nk pya yan
   return (
     <div className=" m-10">
       <Layout>
+        <InputModel
+          title={"Create Item"}
+          isOpen={isCreateItemModalOpen}
+          onClose={closeCreateItemModal}
+        >
+          <form action="" onSubmit={(e) => handleCreate(newItemData, e)}>
+            <div className=" flex items-center justify-center m-4 ">
+              <label htmlFor="" className=" w-[50%]">
+                Item Name:
+              </label>
+              <input
+                name="name"
+                onChange={handleInputChange}
+                type="text"
+                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+              />
+            </div>
+            {getErrorMessage("name") && (
+              <div className="text-red-600 text-center">
+                {getErrorMessage("name")}
+              </div>
+            )}
+            <div className=" flex items-center justify-center m-4 ">
+              <label htmlFor="" className=" w-[50%]">
+                Manufacturer:
+              </label>
+              <input
+                name="manufacturer"
+                onChange={handleInputChange}
+                type="text"
+                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+              />
+            </div>
+            {getErrorMessage("manufacturer") && (
+              <div className="text-red-600 text-center">
+                {getErrorMessage("manufacturer")}
+              </div>
+            )}
+            <div className=" flex items-center justify-center m-4 ">
+              <label htmlFor="" className=" w-[50%]">
+                Category:
+              </label>
+              <input
+                name="category"
+                onChange={handleInputChange}
+                type="text"
+                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+              />
+            </div>
+            {getErrorMessage("category") && (
+              <div className="text-red-600 text-center">
+                {getErrorMessage("category")}
+              </div>
+            )}
+            <div className=" flex items-center justify-center m-4 ">
+              <label htmlFor="" className=" w-[50%]">
+                Price:
+              </label>
+              <input
+                name="price"
+                onChange={handleInputChange}
+                type="text"
+                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+              />
+            </div>
+            {getErrorMessage("price") && (
+              <div className="text-red-600 text-center">
+                {getErrorMessage("price")}
+              </div>
+            )}
+
+            <div className=" flex items-center justify-center m-4 ">
+              <label htmlFor="" className=" w-[50%]">
+                Remark:
+              </label>
+              <input
+                name="remark"
+                onChange={handleInputChange}
+                type="text"
+                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+              />
+            </div>
+            {getErrorMessage("remark") && (
+              <div className="text-red-600 text-center">
+                {getErrorMessage("remark")}
+              </div>
+            )}
+            {/* {zodErrors.length > 0 && (
+              <div className="text-red-600">
+                {zodErrors.map((error) => (
+                  <div key={error.path.join(".")}>{error.message}</div>
+                ))}
+              </div>
+            )} */}
+            <div className=" w-[100%]">
+              <button className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3">
+                Create
+              </button>
+            </div>
+          </form>
+        </InputModel>
         <div className=" flex item-start justify-center ">
           <h1 className=" text-3xl  ">Items</h1>
         </div>
@@ -157,7 +357,10 @@ const index = () => {
               placeholder="Search"
               className="  w-[100%] px-12 py-2 bg-transparent border border-slate-500 rounded-2xl  me-4"
             />
-            <button className=" border border-slate-400 hover:bg-slate-400  rounded-2xl  px-6 py-2">
+            <button
+              onClick={handleModel}
+              className=" border border-slate-400 hover:bg-slate-400  rounded-2xl  px-6 py-2"
+            >
               Create
             </button>
           </div>
@@ -202,54 +405,70 @@ const index = () => {
                     </tr>
                   ))}
                 </thead>
-                <tbody>
-                  {table?.getRowModel()?.rows?.map((row) => (
-                    <tr key={row?.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell?.id}
-                          className=" border border-slate-400 p-4"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
+                {itemData.length > 0 ? (
+                  <tbody>
+                    {table?.getRowModel()?.rows?.map((row) => (
+                      <tr key={row?.id}>
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell?.id}
+                            className=" border border-slate-400 p-4"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                ) : (
+                  <tr>
+                    <td colSpan={columns.length} className="border-none py-10">
+                      <div className=" w-[100%] flex items-center justify-center">
+                        <p className="text-white text-center">
+                          There is currently no item! Please create items
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </table>
             </div>
-            <div className=" my-2 flex  items-center justify-center">
-              <button
-                onClick={() => table.setPageIndex(0)}
-                className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-              >
-                <MdKeyboardDoubleArrowLeft />
-              </button>
-              <button
-                disabled={!table.getCanPreviousPage()}
-                onClick={() => table.previousPage()}
-                className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-              >
-                <MdKeyboardArrowLeft />
-              </button>
-              <button
-                disabled={!table.getCanNextPage()}
-                onClick={() => table.nextPage()}
-                className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-              >
-                <MdKeyboardArrowRight />
-              </button>
+            {itemData.length > 0 ? (
+              <div className=" my-2 flex  items-center justify-center">
+                <button
+                  onClick={() => table.setPageIndex(0)}
+                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                >
+                  <MdKeyboardDoubleArrowLeft />
+                </button>
+                <button
+                  disabled={!table.getCanPreviousPage()}
+                  onClick={() => table.previousPage()}
+                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                >
+                  <MdKeyboardArrowLeft />
+                </button>
+                <button
+                  disabled={!table.getCanNextPage()}
+                  onClick={() => table.nextPage()}
+                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                >
+                  <MdKeyboardArrowRight />
+                </button>
 
-              <button
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-              >
-                <MdKeyboardDoubleArrowRight />
-              </button>
-            </div>
+                <button
+                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                >
+                  <MdKeyboardDoubleArrowRight />
+                </button>
+              </div>
+            ) : (
+              ""
+            )}
           </div>
         )}
       </Layout>
