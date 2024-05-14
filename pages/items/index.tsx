@@ -419,6 +419,96 @@ const index = () => {
               </div>
             </div>
           )}
+          {isEdit && (
+            <form action="" onSubmit={(e) => handleCreate(newItemData, e)}>
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Item Name:
+                </label>
+                <input
+                  name="name"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
+              </div>
+              {getErrorMessage("name") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("name")}
+                </div>
+              )}
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Manufacturer:
+                </label>
+                <input
+                  name="manufacturer"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
+              </div>
+              {getErrorMessage("manufacturer") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("manufacturer")}
+                </div>
+              )}
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Category:
+                </label>
+                <input
+                  name="category"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
+              </div>
+              {getErrorMessage("category") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("category")}
+                </div>
+              )}
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Price:
+                </label>
+                <input
+                  name="price"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
+              </div>
+              {getErrorMessage("price") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("price")}
+                </div>
+              )}
+
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Remark:
+                </label>
+                <input
+                  name="remark"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
+              </div>
+              {getErrorMessage("remark") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("remark")}
+                </div>
+              )}
+              <div className=" w-[100%]">
+                <button className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3">
+                  Create
+                </button>
+              </div>
+            </form>
+          )}
         </InputModel>
         <div className=" flex item-start justify-center ">
           <h1 className=" text-3xl  ">Items</h1>
