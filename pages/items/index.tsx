@@ -46,6 +46,10 @@ export const newItemSchema = z.object({
 });
 export type NewItemData = z.infer<typeof newItemSchema>;
 const index = () => {
+  const [isCreate, setIsCreate] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [isShow, setIsShow] = useState<boolean>(false);
+  const [itemId, setItemId] = useState<string | null>(null);
   //zod error handling state
   const [zodErrors, setZodErrors] = useState<z.ZodIssue[]>([]);
   //item data state for fetching
@@ -72,6 +76,9 @@ const index = () => {
   //modal close  function
   const closeCreateItemModal = () => {
     setIsCreateItemModalOpen(false);
+    setIsCreate(false);
+    setIsEdit(false);
+    setIsShow(false);
   };
   //modal Open function
   const openCreateItemModal = () => {
@@ -101,7 +108,35 @@ const index = () => {
       setItemData(data);
     }
   }, [data]);
-
+  //tanstack query for get individual item
+  const {
+    data: singleItemData,
+    isLoading: isSingleItemLoading,
+    isError: isSingleItemError,
+  } = useQuery<ItemData, Error>({
+    queryKey: ["item", itemId],
+    queryFn: async ({ queryKey }) => {
+      const [_, id] = queryKey;
+      const response = await fetch(`https://api-wai.yethiha.com/items/${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch item data");
+      }
+      return await response.json();
+    },
+    staleTime: 60000,
+    retry: 4,
+    enabled: !!itemId, // Only run this query if itemId is not null
+  });
+  //state updator function that will update the itemId state so that useQuery will run for individual item
+  const getItem = (id: string) => {
+    setItemId(id);
+  };
+  //showing item handler
+  const handleShowItem = (id: string) => {
+    getItem(id);
+    setIsShow(true);
+    handleModel();
+  };
   //tanstack query for delete
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -166,7 +201,6 @@ const index = () => {
       alert("error:");
     },
   });
-  console.log(createMutation.error);
 
   //create Handler
   const handleCreate = (newItemData: NewItemData, e: FormEvent) => {
@@ -177,6 +211,9 @@ const index = () => {
     } else {
       createMutation.mutate(newItemData);
       closeCreateItemModal();
+      setIsCreate(false);
+      setIsEdit(false);
+      setIsShow(false);
       setNewItemData({
         name: "",
         manufacturer: "",
@@ -220,7 +257,10 @@ const index = () => {
           <button className=" p-3 hover:text-cyan-500">
             <CiEdit />
           </button>
-          <button className=" p-3 hover:text-amber-400">
+          <button
+            onClick={() => handleShowItem(row.row.original.id)}
+            className=" p-3 hover:text-amber-400"
+          >
             <IoInformationCircleOutline />
           </button>
           <button className=" p-3 hover:text-red-600">
@@ -237,7 +277,7 @@ const index = () => {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-  console.log(newItemData);
+  console.log(singleItemData);
   //function to get zod error msg for specific field
   const getErrorMessage = (field: string) => {
     const error = zodErrors.find((err) => err.path.includes(field));
@@ -247,105 +287,138 @@ const index = () => {
     <div className=" m-10">
       <Layout>
         <InputModel
-          title={"Create Item"}
+          title={isCreate ? "Create Item" : isShow ? "Item" : ""}
           isOpen={isCreateItemModalOpen}
           onClose={closeCreateItemModal}
         >
-          <form action="" onSubmit={(e) => handleCreate(newItemData, e)}>
-            <div className=" flex items-center justify-center m-4 ">
-              <label htmlFor="" className=" w-[50%]">
-                Item Name:
-              </label>
-              <input
-                name="name"
-                onChange={handleInputChange}
-                type="text"
-                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-              />
-            </div>
-            {getErrorMessage("name") && (
-              <div className="text-red-600 text-center">
-                {getErrorMessage("name")}
+          {isCreate && (
+            <form action="" onSubmit={(e) => handleCreate(newItemData, e)}>
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Item Name:
+                </label>
+                <input
+                  name="name"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
               </div>
-            )}
-            <div className=" flex items-center justify-center m-4 ">
-              <label htmlFor="" className=" w-[50%]">
-                Manufacturer:
-              </label>
-              <input
-                name="manufacturer"
-                onChange={handleInputChange}
-                type="text"
-                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-              />
-            </div>
-            {getErrorMessage("manufacturer") && (
-              <div className="text-red-600 text-center">
-                {getErrorMessage("manufacturer")}
+              {getErrorMessage("name") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("name")}
+                </div>
+              )}
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Manufacturer:
+                </label>
+                <input
+                  name="manufacturer"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
               </div>
-            )}
-            <div className=" flex items-center justify-center m-4 ">
-              <label htmlFor="" className=" w-[50%]">
-                Category:
-              </label>
-              <input
-                name="category"
-                onChange={handleInputChange}
-                type="text"
-                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-              />
-            </div>
-            {getErrorMessage("category") && (
-              <div className="text-red-600 text-center">
-                {getErrorMessage("category")}
+              {getErrorMessage("manufacturer") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("manufacturer")}
+                </div>
+              )}
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Category:
+                </label>
+                <input
+                  name="category"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
               </div>
-            )}
-            <div className=" flex items-center justify-center m-4 ">
-              <label htmlFor="" className=" w-[50%]">
-                Price:
-              </label>
-              <input
-                name="price"
-                onChange={handleInputChange}
-                type="text"
-                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-              />
-            </div>
-            {getErrorMessage("price") && (
-              <div className="text-red-600 text-center">
-                {getErrorMessage("price")}
+              {getErrorMessage("category") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("category")}
+                </div>
+              )}
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Price:
+                </label>
+                <input
+                  name="price"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
               </div>
-            )}
+              {getErrorMessage("price") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("price")}
+                </div>
+              )}
 
-            <div className=" flex items-center justify-center m-4 ">
-              <label htmlFor="" className=" w-[50%]">
-                Remark:
-              </label>
-              <input
-                name="remark"
-                onChange={handleInputChange}
-                type="text"
-                className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-              />
-            </div>
-            {getErrorMessage("remark") && (
-              <div className="text-red-600 text-center">
-                {getErrorMessage("remark")}
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-[50%]">
+                  Remark:
+                </label>
+                <input
+                  name="remark"
+                  onChange={handleInputChange}
+                  type="text"
+                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                />
               </div>
-            )}
-            {/* {zodErrors.length > 0 && (
-              <div className="text-red-600">
-                {zodErrors.map((error) => (
-                  <div key={error.path.join(".")}>{error.message}</div>
-                ))}
+              {getErrorMessage("remark") && (
+                <div className="text-red-600 text-center">
+                  {getErrorMessage("remark")}
+                </div>
+              )}
+              <div className=" w-[100%]">
+                <button className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3">
+                  Create
+                </button>
               </div>
-            )} */}
-            <div className=" w-[100%]">
-              <button className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3">
-                Create
-              </button>
+            </form>
+          )}
+          {isShow && (
+            <div>
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-40">
+                  Item Name:
+                </label>
+                <p className=" w-40  ">{singleItemData?.name}</p>
+              </div>
+
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-40  ">
+                  Manufacturer:
+                </label>
+                <p className=" w-40  ">{singleItemData?.manufacturer}</p>
+              </div>
+
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-40  ">
+                  Category:
+                </label>
+                <p className=" w-40  ">{singleItemData?.category}</p>
+              </div>
+
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-40  ">
+                  Price:
+                </label>
+                <p className=" w-40  ">{singleItemData?.price}</p>
+              </div>
+
+              <div className=" flex items-center justify-center m-4 ">
+                <label htmlFor="" className=" w-40  ">
+                  Remark:
+                </label>
+                <p className=" w-40  ">{singleItemData?.remark}</p>
+              </div>
             </div>
-          </form>
+          )}
         </InputModel>
         <div className=" flex item-start justify-center ">
           <h1 className=" text-3xl  ">Items</h1>
@@ -358,7 +431,10 @@ const index = () => {
               className="  w-[100%] px-12 py-2 bg-transparent border border-slate-500 rounded-2xl  me-4"
             />
             <button
-              onClick={handleModel}
+              onClick={() => {
+                setIsCreate(true);
+                handleModel();
+              }}
               className=" border border-slate-400 hover:bg-slate-400  rounded-2xl  px-6 py-2"
             >
               Create
@@ -424,15 +500,20 @@ const index = () => {
                     ))}
                   </tbody>
                 ) : (
-                  <tr>
-                    <td colSpan={columns.length} className="border-none py-10">
-                      <div className=" w-[100%] flex items-center justify-center">
-                        <p className="text-white text-center">
-                          There is currently no item! Please create items
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
+                  <tbody>
+                    <tr>
+                      <td
+                        colSpan={columns.length}
+                        className="border-none py-10"
+                      >
+                        <div className=" w-[100%] flex items-center justify-center">
+                          <p className="text-white text-center">
+                            There is currently no item! Please create items
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
                 )}
               </table>
             </div>

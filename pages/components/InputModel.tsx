@@ -21,11 +21,11 @@ const InputModel: React.FC<ModalProps> = ({ isOpen, onClose, children,title }) =
             <div className="relative w-auto max-w-3xl mx-auto my-6">
               <div className="relative bg-black  flex flex-col w-full  border-0 rounded-lg shadow-lg outline-none focus:outline-none">
                 <div className="flex items-center justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
-                  {title && (
+                 
                     <h3 className="text-lg font-semibold text-white flex-grow text-center">
                       {title}
                     </h3>
-                  )}
+                
                   <button
                     className="p-1 ml-auto bg-transparent border-0 text-black float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
                     onClick={onClose}
