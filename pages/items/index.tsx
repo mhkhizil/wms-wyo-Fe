@@ -1,4 +1,4 @@
-//To modiy => zod error ko alert bar nk pya yan ,empty state mhr table size pyin yan ,modal opening closing animation htl yan ,suceess mssage twy ll tt tt yat yat pya yan
+//To modiy => zod error ko alert bar nk pya yan ,empty state mhr table size pyin yan ,modal opening closing animation htl yan ,suceess mssage twy ll tt tt yat yat pya yan,show mhr done button htl p state twy ko pyn false py
 import {
   QueryClient,
   useMutation,
@@ -46,10 +46,14 @@ export const newItemSchema = z.object({
 });
 export type NewItemData = z.infer<typeof newItemSchema>;
 const index = () => {
+  //state for handling input modal
   const [isCreate, setIsCreate] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isShow, setIsShow] = useState<boolean>(false);
+  //state for getting itemID for single item fetch
   const [itemId, setItemId] = useState<string | null>(null);
+  //item id for edit 
+  const [editItemId, setEditItemId] = useState<string>("");
   //zod error handling state
   const [zodErrors, setZodErrors] = useState<z.ZodIssue[]>([]);
   //item data state for fetching
@@ -62,13 +66,36 @@ const index = () => {
     price: 0,
     remark: "",
   });
+  //item data state for fetching single item
+  const [singleItem, SetSingleItem] = useState<NewItemData>({
+    name: "",
+    manufacturer: "",
+    category: "",
+    price: 0,
+    remark: "",
+  });
+  //item data state for updating item
+  const [editItemData, setEditItemData] = useState<NewItemData>({
+    name: "",
+    manufacturer: "",
+    category: "",
+    price: 0,
+    remark: "",
+  });
   //input change handler
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>,isEdit:boolean=false) => {
     const { name, value } = e.target;
-    setNewItemData({
-      ...newItemData,
-      [name]: name === "price" ? Number(value) : value,
-    });
+    if (isEdit) {
+      setEditItemData({
+        ...editItemData,
+        [name]: name === "price" ? Number(value) : value,
+      });
+    } else {
+      setNewItemData({
+        ...newItemData,
+        [name]: name === "price" ? Number(value) : value,
+      });
+    }
   };
   //Modal state
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] =
@@ -137,6 +164,12 @@ const index = () => {
     setIsShow(true);
     handleModel();
   };
+  //useEffect for insertng data into state
+  useEffect(() => {
+    if (singleItemData) {
+      SetSingleItem(singleItemData);
+    }
+  }, [singleItemData]);
   //tanstack query for delete
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -223,6 +256,67 @@ const index = () => {
       });
     }
   };
+  //open edit button
+  const openEditItem = (id: string) => {
+    const item = itemData.find((item) => item.id === id);
+    if (item) {
+      setEditItemId(item?.id);
+      setEditItemData(item);
+      setIsEdit(true);
+      handleModel();
+    }
+  };
+  //mutation for edit 
+  const updateMutation = useMutation({
+    mutationFn: async ({ itemId, updatedItemData }: { itemId: string; updatedItemData: NewItemData })  => {
+      const response = await fetch(`https://api-wai.yethiha.com/items/${itemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedItemData),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update item");
+      }
+  
+      return response;
+    },
+  
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["items"],
+        refetchType: "active",
+      });
+      alert("Item updated successfully");
+    },
+    onError: () => {
+      alert("Failed to update item");
+    },
+  });
+  //handle edit 
+  const handleEdit = (e: FormEvent,itemId:string,updatedItemData:NewItemData) => {
+    e.preventDefault();
+    const result = newItemSchema.safeParse(updatedItemData);
+    if (!result.success) {
+      setZodErrors(result.error.issues);
+    } else {
+    
+        updateMutation.mutate({itemId,updatedItemData});
+     
+      
+      closeCreateItemModal();
+      setIsCreate(false);
+      setIsEdit(false);
+      setIsShow(false);
+      setEditItemData({
+        name: "",
+        manufacturer: "",
+        category: "",
+        price: 0,
+        remark: "",
+      });
+    }
+  };
   //column def using tanstak table
   const columns: ColumnDef<ItemData>[] = [
     {
@@ -254,7 +348,7 @@ const index = () => {
       header: "Actions",
       cell: (row) => (
         <div className=" flex items-center justify-around">
-          <button className=" p-3 hover:text-cyan-500">
+          <button onClick={()=> openEditItem(row.row.original.id)} className=" p-3 hover:text-cyan-500">
             <CiEdit />
           </button>
           <button
@@ -277,7 +371,8 @@ const index = () => {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-  console.log(singleItemData);
+  console.log(editItemData);
+
   //function to get zod error msg for specific field
   const getErrorMessage = (field: string) => {
     const error = zodErrors.find((err) => err.path.includes(field));
@@ -387,47 +482,48 @@ const index = () => {
                 <label htmlFor="" className=" w-40">
                   Item Name:
                 </label>
-                <p className=" w-40  ">{singleItemData?.name}</p>
+                <p className=" w-40  ">{singleItem?.name}</p>
               </div>
 
               <div className=" flex items-center justify-center m-4 ">
                 <label htmlFor="" className=" w-40  ">
                   Manufacturer:
                 </label>
-                <p className=" w-40  ">{singleItemData?.manufacturer}</p>
+                <p className=" w-40  ">{singleItem?.manufacturer}</p>
               </div>
 
               <div className=" flex items-center justify-center m-4 ">
                 <label htmlFor="" className=" w-40  ">
                   Category:
                 </label>
-                <p className=" w-40  ">{singleItemData?.category}</p>
+                <p className=" w-40  ">{singleItem?.category}</p>
               </div>
 
               <div className=" flex items-center justify-center m-4 ">
                 <label htmlFor="" className=" w-40  ">
                   Price:
                 </label>
-                <p className=" w-40  ">{singleItemData?.price}</p>
+                <p className=" w-40  ">{singleItem?.price}</p>
               </div>
 
               <div className=" flex items-center justify-center m-4 ">
                 <label htmlFor="" className=" w-40  ">
                   Remark:
                 </label>
-                <p className=" w-40  ">{singleItemData?.remark}</p>
+                <p className=" w-40  ">{singleItem?.remark}</p>
               </div>
             </div>
           )}
           {isEdit && (
-            <form action="" onSubmit={(e) => handleCreate(newItemData, e)}>
+            <form action="" onSubmit={(e) => handleEdit( e,editItemId,editItemData,)}>
               <div className=" flex items-center justify-center m-4 ">
                 <label htmlFor="" className=" w-[50%]">
                   Item Name:
                 </label>
                 <input
+                value={editItemData?.name}
                   name="name"
-                  onChange={handleInputChange}
+                  onChange={(e)=>handleInputChange(e,isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -442,8 +538,9 @@ const index = () => {
                   Manufacturer:
                 </label>
                 <input
+                value={editItemData?.manufacturer}
                   name="manufacturer"
-                  onChange={handleInputChange}
+                  onChange={(e)=>handleInputChange(e,isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -458,8 +555,9 @@ const index = () => {
                   Category:
                 </label>
                 <input
+                 value={editItemData?.category}
                   name="category"
-                  onChange={handleInputChange}
+                  onChange={(e)=>handleInputChange(e,isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -474,8 +572,9 @@ const index = () => {
                   Price:
                 </label>
                 <input
+                   value={editItemData?.price}
                   name="price"
-                  onChange={handleInputChange}
+                  onChange={(e)=>handleInputChange(e,isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -491,8 +590,9 @@ const index = () => {
                   Remark:
                 </label>
                 <input
+                  value={editItemData?.remark}
                   name="remark"
-                  onChange={handleInputChange}
+                  onChange={(e)=>handleInputChange(e,isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
