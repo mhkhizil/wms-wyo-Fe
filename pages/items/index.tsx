@@ -1,4 +1,9 @@
-//To modiy => zod error ko alert bar nk pya yan ,empty state mhr table size pyin yan ,modal opening closing animation htl yan ,suceess mssage twy ll tt tt yat yat pya yan,show mhr done button htl p state twy ko pyn false py
+//To modiy =>
+// 1.zod error ko alert bar nk pya yan ,
+// 2.empty state mhr table size pyin yan ,
+// 3.modal opening closing animation htl yan ,
+// 4.suceess mssage twy ll tt tt yat yat pya yan,
+// 5.show mhr done button htl p state twy ko pyn false py
 import {
   QueryClient,
   useMutation,
@@ -27,7 +32,7 @@ import {
   MdKeyboardDoubleArrowRight,
 } from "react-icons/md";
 import Loader from "../components/Loader";
-import InputModel from "../components/inputModel";
+import InputModel from "../components/InputModel";
 //type of data fetching from endpoint
 export type ItemData = {
   id: string;
@@ -52,7 +57,7 @@ const index = () => {
   const [isShow, setIsShow] = useState<boolean>(false);
   //state for getting itemID for single item fetch
   const [itemId, setItemId] = useState<string | null>(null);
-  //item id for edit 
+  //item id for edit
   const [editItemId, setEditItemId] = useState<string>("");
   //zod error handling state
   const [zodErrors, setZodErrors] = useState<z.ZodIssue[]>([]);
@@ -83,7 +88,10 @@ const index = () => {
     remark: "",
   });
   //input change handler
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>,isEdit:boolean=false) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    isEdit: boolean = false
+  ) => {
     const { name, value } = e.target;
     if (isEdit) {
       setEditItemData({
@@ -234,7 +242,6 @@ const index = () => {
       alert("error:");
     },
   });
-
   //create Handler
   const handleCreate = (newItemData: NewItemData, e: FormEvent) => {
     e.preventDefault();
@@ -266,22 +273,28 @@ const index = () => {
       handleModel();
     }
   };
-  //mutation for edit 
+  //mutation for edit
   const updateMutation = useMutation({
-    mutationFn: async ({ itemId, updatedItemData }: { itemId: string; updatedItemData: NewItemData })  => {
-      const response = await fetch(`https://api-wai.yethiha.com/items/${itemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedItemData),
-      });
-  
+    mutationFn: async ({
+      itemId,
+      updatedItemData,
+    }: {
+      itemId: string;
+      updatedItemData: NewItemData;
+    }) => {
+      const response = await fetch(
+        `https://api-wai.yethiha.com/items/${itemId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedItemData),
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to update item");
       }
-  
       return response;
     },
-  
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["items"],
@@ -293,17 +306,18 @@ const index = () => {
       alert("Failed to update item");
     },
   });
-  //handle edit 
-  const handleEdit = (e: FormEvent,itemId:string,updatedItemData:NewItemData) => {
+  //handle edit
+  const handleEdit = (
+    e: FormEvent,
+    itemId: string,
+    updatedItemData: NewItemData
+  ) => {
     e.preventDefault();
     const result = newItemSchema.safeParse(updatedItemData);
     if (!result.success) {
       setZodErrors(result.error.issues);
     } else {
-    
-        updateMutation.mutate({itemId,updatedItemData});
-     
-      
+      updateMutation.mutate({ itemId, updatedItemData });
       closeCreateItemModal();
       setIsCreate(false);
       setIsEdit(false);
@@ -348,7 +362,10 @@ const index = () => {
       header: "Actions",
       cell: (row) => (
         <div className=" flex items-center justify-around">
-          <button onClick={()=> openEditItem(row.row.original.id)} className=" p-3 hover:text-cyan-500">
+          <button
+            onClick={() => openEditItem(row.row.original.id)}
+            className=" p-3 hover:text-cyan-500"
+          >
             <CiEdit />
           </button>
           <button
@@ -371,8 +388,6 @@ const index = () => {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-  console.log(editItemData);
-
   //function to get zod error msg for specific field
   const getErrorMessage = (field: string) => {
     const error = zodErrors.find((err) => err.path.includes(field));
@@ -515,15 +530,18 @@ const index = () => {
             </div>
           )}
           {isEdit && (
-            <form action="" onSubmit={(e) => handleEdit( e,editItemId,editItemData,)}>
+            <form
+              action=""
+              onSubmit={(e) => handleEdit(e, editItemId, editItemData)}
+            >
               <div className=" flex items-center justify-center m-4 ">
                 <label htmlFor="" className=" w-[50%]">
                   Item Name:
                 </label>
                 <input
-                value={editItemData?.name}
+                  value={editItemData?.name}
                   name="name"
-                  onChange={(e)=>handleInputChange(e,isEdit)}
+                  onChange={(e) => handleInputChange(e, isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -538,9 +556,9 @@ const index = () => {
                   Manufacturer:
                 </label>
                 <input
-                value={editItemData?.manufacturer}
+                  value={editItemData?.manufacturer}
                   name="manufacturer"
-                  onChange={(e)=>handleInputChange(e,isEdit)}
+                  onChange={(e) => handleInputChange(e, isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -555,9 +573,9 @@ const index = () => {
                   Category:
                 </label>
                 <input
-                 value={editItemData?.category}
+                  value={editItemData?.category}
                   name="category"
-                  onChange={(e)=>handleInputChange(e,isEdit)}
+                  onChange={(e) => handleInputChange(e, isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -572,9 +590,9 @@ const index = () => {
                   Price:
                 </label>
                 <input
-                   value={editItemData?.price}
+                  value={editItemData?.price}
                   name="price"
-                  onChange={(e)=>handleInputChange(e,isEdit)}
+                  onChange={(e) => handleInputChange(e, isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -592,7 +610,7 @@ const index = () => {
                 <input
                   value={editItemData?.remark}
                   name="remark"
-                  onChange={(e)=>handleInputChange(e,isEdit)}
+                  onChange={(e) => handleInputChange(e, isEdit)}
                   type="text"
                   className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
                 />
@@ -746,5 +764,4 @@ const index = () => {
     </div>
   );
 };
-
 export default index;
