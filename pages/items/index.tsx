@@ -1,9 +1,7 @@
 //To modiy =>
 // 1.zod error ko alert bar nk pya yan ,
-// 2.empty state mhr table size pyin yan --Done,
-// 3.modal opening closing animation htl yan-Done ,
-// 4.suceess mssage twy ll tt tt yat yat pya yan,
-// 5.show mhr done button htl p state twy ko pyn false py-done
+// 2.suceess mssage twy ll tt tt yat yat pya yan,
+//
 import {
   QueryClient,
   useMutation,
