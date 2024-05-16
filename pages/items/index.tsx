@@ -1,9 +1,9 @@
 //To modiy =>
 // 1.zod error ko alert bar nk pya yan ,
 // 2.empty state mhr table size pyin yan --Done,
-// 3.modal opening closing animation htl yan ,
+// 3.modal opening closing animation htl yan-Done ,
 // 4.suceess mssage twy ll tt tt yat yat pya yan,
-// 5.show mhr done button htl p state twy ko pyn false py
+// 5.show mhr done button htl p state twy ko pyn false py-done
 import {
   QueryClient,
   useMutation,
@@ -198,9 +198,6 @@ const index = () => {
         queryKey: ["items"],
         refetchType: "active",
       });
-     
-   
-   
     },
     onError: () => {
       alert("error");
@@ -336,13 +333,12 @@ const index = () => {
     }
   };
 
-
   //column def using tanstak table
   const columns: ColumnDef<ItemData>[] = [
     {
       accessorKey: "id",
       header: "ID",
-      cell: (info) => info.row.index+1,
+      cell: (info) => info.row.index + 1,
     },
     {
       accessorKey: "name",
@@ -357,7 +353,9 @@ const index = () => {
       header: "Manufacturer",
       cell: (info) => {
         const manufacturer = info.getValue<string>();
-        return manufacturer.length > 10 ? `${manufacturer.slice(0, 10)}...` : manufacturer;
+        return manufacturer.length > 10
+          ? `${manufacturer.slice(0, 10)}...`
+          : manufacturer;
       },
     },
     {
@@ -373,7 +371,7 @@ const index = () => {
       header: "Price",
       cell: (info) => {
         const price = info.getValue<number>();
-        return price.toLocaleString("en-US") +' Ks';
+        return price.toLocaleString("en-US") + " Ks";
       },
     },
     {
@@ -545,7 +543,9 @@ const index = () => {
                 <label htmlFor="" className=" w-40  ">
                   Price:
                 </label>
-                <p className=" w-40  ">{singleItem?.price.toLocaleString("en-US")} Ks</p>
+                <p className=" w-40  ">
+                  {singleItem?.price.toLocaleString("en-US")} Ks
+                </p>
               </div>
 
               <div className=" flex items-center justify-center m-4 ">
@@ -553,6 +553,14 @@ const index = () => {
                   Remark:
                 </label>
                 <p className=" w-40  ">{singleItem?.remark}</p>
+              </div>
+              <div className=" w-[100%]">
+                <button
+                  onClick={closeCreateItemModal}
+                  className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3"
+                >
+                  Done
+                </button>
               </div>
             </div>
           )}
@@ -658,33 +666,33 @@ const index = () => {
         <div className=" my-3 flex item-center justify-center ">
           <h1 className=" text-3xl  ">Items</h1>
         </div>
-      <div className="  flex items-center justify-center">
-     <div className=" w-[75%]">
-     <div className="   my-4 flex  items-center justify-between">
-          <div className="w-[50%] flex items-center justify-around">
-            <input
-              type="text"
-              placeholder="Search"
-              className=" w-[70%] px-4 py-2 bg-transparent border border-slate-500 rounded-2xl  "
-            />
-            <button
-              onClick={() => {
-                setIsCreate(true);
-                handleModel();
-              }}
-              className=" w-[25%] border border-slate-400 hover:bg-slate-400  rounded-2xl  px-4 py-2"
-            >
-              Create
-            </button>
+        <div className="  flex items-center justify-center">
+          <div className=" w-[75%]">
+            <div className="   my-4 flex  items-center justify-between">
+              <div className="w-[50%] flex items-center justify-around">
+                <input
+                  type="text"
+                  placeholder="Search"
+                  className=" w-[70%] px-4 py-2 bg-transparent border border-slate-500 rounded-2xl  "
+                />
+                <button
+                  onClick={() => {
+                    setIsCreate(true);
+                    handleModel();
+                  }}
+                  className=" w-[25%] border border-slate-400 hover:bg-slate-400  rounded-2xl  px-4 py-2"
+                >
+                  Create
+                </button>
+              </div>
+              <div className=" w-[10%] flex items-center justify-around">
+                <p>filter </p>
+                <p>sort </p>
+              </div>
+              <div className=" w-24"></div>
+            </div>
           </div>
-          <div className=" w-[10%] flex items-center justify-around">
-            <p>filter </p>
-            <p>sort </p>
-          </div>
-          <div className=" w-24"></div>
         </div>
-     </div>
-      </div>
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <Loader />
@@ -759,34 +767,34 @@ const index = () => {
             {itemData.length > 0 ? (
               <div className=" flex items-center justify-center">
                 <div className=" w-[75%] my-2 flex  items-center justify-center">
-                <button
-                  onClick={() => table.setPageIndex(0)}
-                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                >
-                  <MdKeyboardDoubleArrowLeft />
-                </button>
-                <button
-                  disabled={!table.getCanPreviousPage()}
-                  onClick={() => table.previousPage()}
-                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                >
-                  <MdKeyboardArrowLeft />
-                </button>
-                <button
-                  disabled={!table.getCanNextPage()}
-                  onClick={() => table.nextPage()}
-                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                >
-                  <MdKeyboardArrowRight />
-                </button>
+                  <button
+                    onClick={() => table.setPageIndex(0)}
+                    className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                  >
+                    <MdKeyboardDoubleArrowLeft />
+                  </button>
+                  <button
+                    disabled={!table.getCanPreviousPage()}
+                    onClick={() => table.previousPage()}
+                    className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                  >
+                    <MdKeyboardArrowLeft />
+                  </button>
+                  <button
+                    disabled={!table.getCanNextPage()}
+                    onClick={() => table.nextPage()}
+                    className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                  >
+                    <MdKeyboardArrowRight />
+                  </button>
 
-                <button
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                >
-                  <MdKeyboardDoubleArrowRight />
-                </button>
-              </div>
+                  <button
+                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                    className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                  >
+                    <MdKeyboardDoubleArrowRight />
+                  </button>
+                </div>
               </div>
             ) : (
               ""
