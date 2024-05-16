@@ -1,6 +1,6 @@
 //To modiy =>
 // 1.zod error ko alert bar nk pya yan ,
-// 2.empty state mhr table size pyin yan ,
+// 2.empty state mhr table size pyin yan --Done,
 // 3.modal opening closing animation htl yan ,
 // 4.suceess mssage twy ll tt tt yat yat pya yan,
 // 5.show mhr done button htl p state twy ko pyn false py
@@ -33,6 +33,7 @@ import {
 } from "react-icons/md";
 import Loader from "../components/Loader";
 import InputModel from "../components/InputModel";
+import { Slide, toast } from "react-toastify";
 //type of data fetching from endpoint
 export type ItemData = {
   id: string;
@@ -197,6 +198,9 @@ const index = () => {
         queryKey: ["items"],
         refetchType: "active",
       });
+     
+   
+   
     },
     onError: () => {
       alert("error");
@@ -331,31 +335,54 @@ const index = () => {
       });
     }
   };
+
+
   //column def using tanstak table
   const columns: ColumnDef<ItemData>[] = [
     {
       accessorKey: "id",
       header: "ID",
+      cell: (info) => info.row.index+1,
     },
     {
       accessorKey: "name",
       header: "Name",
+      cell: (info) => {
+        const name = info.getValue<string>();
+        return name.length > 10 ? `${name.slice(0, 10)}...` : name;
+      },
     },
     {
       accessorKey: "manufacturer",
       header: "Manufacturer",
+      cell: (info) => {
+        const manufacturer = info.getValue<string>();
+        return manufacturer.length > 10 ? `${manufacturer.slice(0, 10)}...` : manufacturer;
+      },
     },
     {
       accessorKey: "category",
       header: "Category",
+      cell: (info) => {
+        const category = info.getValue<string>();
+        return category.length > 10 ? `${category.slice(0, 10)}...` : category;
+      },
     },
     {
       accessorKey: "price",
       header: "Price",
+      cell: (info) => {
+        const price = info.getValue<number>();
+        return price.toLocaleString("en-US") +' Ks';
+      },
     },
     {
       accessorKey: "remark",
       header: "Remark",
+      cell: (info) => {
+        const remark = info.getValue<string>();
+        return remark.length > 10 ? `${remark.slice(0, 10)}...` : remark;
+      },
     },
     {
       accessorKey: "actions",
@@ -518,7 +545,7 @@ const index = () => {
                 <label htmlFor="" className=" w-40  ">
                   Price:
                 </label>
-                <p className=" w-40  ">{singleItem?.price}</p>
+                <p className=" w-40  ">{singleItem?.price.toLocaleString("en-US")} Ks</p>
               </div>
 
               <div className=" flex items-center justify-center m-4 ">
@@ -628,32 +655,36 @@ const index = () => {
             </form>
           )}
         </InputModel>
-        <div className=" flex item-start justify-center ">
+        <div className=" my-3 flex item-center justify-center ">
           <h1 className=" text-3xl  ">Items</h1>
         </div>
-        <div className=" my-4 flex  items-center justify-around">
-          <div className=" flex items-center justify-normal">
+      <div className="  flex items-center justify-center">
+     <div className=" w-[75%]">
+     <div className="   my-4 flex  items-center justify-between">
+          <div className="w-[50%] flex items-center justify-around">
             <input
               type="text"
               placeholder="Search"
-              className="  w-[100%] px-12 py-2 bg-transparent border border-slate-500 rounded-2xl  me-4"
+              className=" w-[70%] px-4 py-2 bg-transparent border border-slate-500 rounded-2xl  "
             />
             <button
               onClick={() => {
                 setIsCreate(true);
                 handleModel();
               }}
-              className=" border border-slate-400 hover:bg-slate-400  rounded-2xl  px-6 py-2"
+              className=" w-[25%] border border-slate-400 hover:bg-slate-400  rounded-2xl  px-4 py-2"
             >
               Create
             </button>
           </div>
-          <div className="flex items-center justify-around">
+          <div className=" w-[10%] flex items-center justify-around">
             <p>filter </p>
             <p>sort </p>
           </div>
           <div className=" w-24"></div>
         </div>
+     </div>
+      </div>
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <Loader />
@@ -661,7 +692,7 @@ const index = () => {
         ) : (
           <div>
             <div className=" flex item-center justify-center ">
-              <table className=" border border-slate-400 table-auto">
+              <table className=" border border-slate-400  table-fixed w-[75%]">
                 <thead>
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup?.id}>
@@ -726,7 +757,8 @@ const index = () => {
               </table>
             </div>
             {itemData.length > 0 ? (
-              <div className=" my-2 flex  items-center justify-center">
+              <div className=" flex items-center justify-center">
+                <div className=" w-[75%] my-2 flex  items-center justify-center">
                 <button
                   onClick={() => table.setPageIndex(0)}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
@@ -754,6 +786,7 @@ const index = () => {
                 >
                   <MdKeyboardDoubleArrowRight />
                 </button>
+              </div>
               </div>
             ) : (
               ""
