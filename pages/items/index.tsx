@@ -32,15 +32,9 @@ import {
 import Loader from "../components/Loader";
 import InputModel from "../components/InputModel";
 import { Slide, toast } from "react-toastify";
+import { useGetAllItems, useGetItem } from "@/hooks/useFetchItems";
+import { item, itemList } from "../dto/itemDto";
 //type of data fetching from endpoint
-export type ItemData = {
-  id: string;
-  name: string;
-  manufacturer: string;
-  category: string;
-  price: number;
-  remark: string;
-};
 export const newItemSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   manufacturer: z.string().trim().min(1, "Manufacturer is required"),
@@ -61,7 +55,7 @@ const index = () => {
   //zod error handling state
   const [zodErrors, setZodErrors] = useState<z.ZodIssue[]>([]);
   //item data state for fetching
-  const [itemData, setItemData] = useState<ItemData[]>([]);
+  const [itemData, setItemData] = useState<item[]>([]);
   //item data state for creating
   const [newItemData, setNewItemData] = useState<NewItemData>({
     name: "",
@@ -120,47 +114,22 @@ const index = () => {
   };
   const queryClient = useQueryClient();
   //tanstack query for data fetching
-  const { data, isLoading, isError } = useQuery<ItemData[], Error>({
-    queryKey: ["items"],
-    queryFn: async () => {
-      const response = await fetch(`https://api-wai.yethiha.com/items`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch item data");
-      }
+  const { data, isLoading, isError } = useGetAllItems();
 
-      // Update data directly inside queryFn
-      return await response.json();
-    },
-
-    staleTime: 60000 * 1, // Keep data fresh for 5 minutes
-    // refetchInterval:1000
-    retry: 4, // Retry failed requests up to 2 times
-  });
   //updating fetched data into state
   useEffect(() => {
     if (data) {
-      setItemData(data);
+      setItemData(data?.items);
     }
   }, [data]);
+
   //tanstack query for get individual item
   const {
     data: singleItemData,
     isLoading: isSingleItemLoading,
     isError: isSingleItemError,
-  } = useQuery<ItemData, Error>({
-    queryKey: ["item", itemId],
-    queryFn: async ({ queryKey }) => {
-      const [_, id] = queryKey;
-      const response = await fetch(`https://api-wai.yethiha.com/items/${id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch item data");
-      }
-      return await response.json();
-    },
-    staleTime: 60000,
-    retry: 4,
-    enabled: !!itemId, // Only run this query if itemId is not null
-  });
+  } = useGetItem(itemId);
+
   //state updator function that will update the itemId state so that useQuery will run for individual item
   const getItem = (id: string) => {
     setItemId(id);
@@ -332,7 +301,7 @@ const index = () => {
   };
 
   //column def using tanstak table
-  const columns: ColumnDef<ItemData>[] = [
+  const columns: ColumnDef<item>[] = [
     {
       accessorKey: "id",
       header: "ID",
@@ -407,7 +376,7 @@ const index = () => {
   //table instance creation
   const table = useReactTable({
     columns,
-    data: isLoading ? [] : itemData, //,
+    data: itemData, //,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
@@ -691,114 +660,110 @@ const index = () => {
             </div>
           </div>
         </div>
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader />
-          </div>
-        ) : (
-          <div>
-            <div className=" flex item-center justify-center ">
-              <table className=" border border-slate-400  table-fixed w-[75%]">
-                <thead>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup?.id}>
-                      {headerGroup?.headers?.map((header) => (
-                        <th
-                          onClick={header.column.getToggleSortingHandler()}
-                          key={header?.id}
-                          className=" border border-slate-400 p-6"
-                        >
-                          {header.isPlaceholder ? null : (
-                            <div>
-                              {flexRender(
-                                header?.column?.columnDef?.header,
-                                header.getContext()
-                              )}
-                              {
-                                // { asc: ` asc`, desc: ` desc` }[
-                                //   header.column.getIsSorted() ?? null
-                                // ]
-                              }
-                            </div>
-                          )}
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                {itemData.length > 0 ? (
-                  <tbody>
-                    {table?.getRowModel()?.rows?.map((row) => (
-                      <tr key={row?.id}>
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell?.id}
-                            className=" border border-slate-400 p-4"
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext()
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td
-                        colSpan={columns.length}
-                        className="border-none py-10"
-                      >
-                        <div className=" w-[100%] flex items-center justify-center">
-                          <p className="text-white text-center">
-                            There is currently no item! Please create items
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
-            </div>
-            {itemData.length > 0 ? (
-              <div className=" flex items-center justify-center">
-                <div className=" w-[75%] my-2 flex  items-center justify-center">
-                  <button
-                    onClick={() => table.setPageIndex(0)}
-                    className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                  >
-                    <MdKeyboardDoubleArrowLeft />
-                  </button>
-                  <button
-                    disabled={!table.getCanPreviousPage()}
-                    onClick={() => table.previousPage()}
-                    className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                  >
-                    <MdKeyboardArrowLeft />
-                  </button>
-                  <button
-                    disabled={!table.getCanNextPage()}
-                    onClick={() => table.nextPage()}
-                    className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                  >
-                    <MdKeyboardArrowRight />
-                  </button>
 
-                  <button
-                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                    className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                  >
-                    <MdKeyboardDoubleArrowRight />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              ""
-            )}
+        <div>
+          <div className=" flex item-center justify-center ">
+            <table className=" border border-slate-400  table-fixed w-[75%]">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup?.id}>
+                    {headerGroup?.headers?.map((header) => (
+                      <th
+                        onClick={header.column.getToggleSortingHandler()}
+                        key={header?.id}
+                        className=" border border-slate-400 p-6"
+                      >
+                        {header.isPlaceholder ? null : (
+                          <div>
+                            {flexRender(
+                              header?.column?.columnDef?.header,
+                              header.getContext()
+                            )}
+                            {
+                              // { asc: ` asc`, desc: ` desc` }[
+                              //   header.column.getIsSorted() ?? null
+                              // ]
+                            }
+                          </div>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              {itemData.length > 0 ? (
+                <tbody>
+                  {table?.getRowModel()?.rows?.map((row) => {
+                    return (
+                      <tr key={row?.id}>
+                        {row.getVisibleCells().map((cell) => {
+                          return (
+                            <td
+                              key={cell?.id}
+                              className=" border border-slate-400 p-4"
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              ) : (
+                <tbody>
+                  <tr>
+                    <td colSpan={columns.length} className="border-none py-10">
+                      <div className=" w-[100%] flex items-center justify-center">
+                        <p className="text-white text-center">
+                          There is currently no item! Please create items
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
           </div>
-        )}
+          {itemData.length > 0 ? (
+            <div className=" flex items-center justify-center">
+              <div className=" w-[75%] my-2 flex  items-center justify-center">
+                <button
+                  onClick={() => table.setPageIndex(0)}
+                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                >
+                  <MdKeyboardDoubleArrowLeft />
+                </button>
+                <button
+                  disabled={!table.getCanPreviousPage()}
+                  onClick={() => table.previousPage()}
+                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                >
+                  <MdKeyboardArrowLeft />
+                </button>
+                <button
+                  disabled={!table.getCanNextPage()}
+                  onClick={() => table.nextPage()}
+                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                >
+                  <MdKeyboardArrowRight />
+                </button>
+
+                <button
+                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
+                >
+                  <MdKeyboardDoubleArrowRight />
+                </button>
+              </div>
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
       </Layout>
     </div>
   );
