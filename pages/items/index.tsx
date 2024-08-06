@@ -32,17 +32,18 @@ import {
 import Loader from "../components/Loader";
 import InputModel from "../components/InputModel";
 import { Slide, toast } from "react-toastify";
-import { useGetAllItems, useGetItem } from "@/hooks/useFetchItems";
-import { item, itemList } from "../dto/itemDto";
+
+import { item, itemList, NewItemData, newItemSchema } from "../dto/itemDto";
+import { useCreateItem, useDeleteItem, useGetAllItems, useGetItem, useUpdateItem } from "@/hooks/useItemData";
 //type of data fetching from endpoint
-export const newItemSchema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  manufacturer: z.string().trim().min(1, "Manufacturer is required"),
-  category: z.string().trim().min(1, "Category is required"),
-  price: z.number().positive("Price must be positive"),
-  remark: z.string().trim().min(1, "Remark is required"),
-});
-export type NewItemData = z.infer<typeof newItemSchema>;
+// export const newItemSchema = z.object({
+//   name: z.string().trim().min(1, "Name is required"),
+//   manufacturer: z.string().trim().min(1, "Manufacturer is required"),
+//   category: z.string().trim().min(1, "Category is required"),
+//   price: z.number().positive("Price must be positive"),
+//   remark: z.string().trim().min(1, "Remark is required"),
+// });
+// export type NewItemData = z.infer<typeof newItemSchema>;
 const index = () => {
   //state for handling input modal
   const [isCreate, setIsCreate] = useState<boolean>(false);
@@ -147,29 +148,7 @@ const index = () => {
     }
   }, [singleItemData]);
   //tanstack query for delete
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`https://api-wai.yethiha.com/items/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete item");
-      }
-
-      return response;
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["items"],
-        refetchType: "active",
-      });
-    },
-    onError: () => {
-      alert("error");
-    },
-  });
+  const deleteMutation =useDeleteItem(queryClient);
   //delete handler
   const handleDelete = (id: string) => {
     if (confirm("Do you want to delete this item?")) {
@@ -182,34 +161,7 @@ const index = () => {
   };
 
   //tanstack query mutation for create
-  const createMutation = useMutation({
-    mutationFn: async (newItemData: NewItemData) => {
-      const response = await fetch(`https://api-wai.yethiha.com/items`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newItemData),
-      });
-
-      console.log(response);
-
-      if (!response.ok) {
-        throw new Error("Failed to delete item");
-      }
-
-      return response;
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["items"],
-        refetchType: "active",
-      });
-      alert("Item created");
-    },
-    onError: () => {
-      alert("error:");
-    },
-  });
+  const createMutation = useCreateItem(queryClient);
   //create Handler
   const handleCreate = (newItemData: NewItemData, e: FormEvent) => {
     e.preventDefault();
@@ -242,38 +194,7 @@ const index = () => {
     }
   };
   //mutation for edit
-  const updateMutation = useMutation({
-    mutationFn: async ({
-      itemId,
-      updatedItemData,
-    }: {
-      itemId: string;
-      updatedItemData: NewItemData;
-    }) => {
-      const response = await fetch(
-        `https://api-wai.yethiha.com/items/${itemId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedItemData),
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to update item");
-      }
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["items"],
-        refetchType: "active",
-      });
-      alert("Item updated successfully");
-    },
-    onError: () => {
-      alert("Failed to update item");
-    },
-  });
+  const updateMutation = useUpdateItem(queryClient);
   //handle edit
   const handleEdit = (
     e: FormEvent,
@@ -299,7 +220,6 @@ const index = () => {
       });
     }
   };
-
   //column def using tanstak table
   const columns: ColumnDef<item>[] = [
     {
