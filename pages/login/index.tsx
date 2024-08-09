@@ -56,7 +56,7 @@ const handleInputChange = (
   };
   return (
     <div className="h-screen w-screen flex justify-center items-center " >
-      <AuthForm loginData={loginData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} error ={error} validationError={errors} />
+      <AuthForm title='Login' switchPageSentence='Need to create an account?' linkText='Create Account' linkPath='/register' loginData={loginData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} error ={error} validationError={errors} />
     </div>
   )
 }
