@@ -34,7 +34,13 @@ import InputModel from "../components/InputModel";
 import { Slide, toast } from "react-toastify";
 
 import { item, itemList, NewItemData, newItemSchema } from "../dto/itemDto";
-import { useCreateItem, useDeleteItem, useGetAllItems, useGetItem, useUpdateItem } from "@/hooks/useItemData";
+import {
+  useCreateItem,
+  useDeleteItem,
+  useGetAllItems,
+  useGetItem,
+  useUpdateItem,
+} from "@/hooks/useItemData";
 //type of data fetching from endpoint
 // export const newItemSchema = z.object({
 //   name: z.string().trim().min(1, "Name is required"),
@@ -114,8 +120,10 @@ const index = () => {
     setIsCreateItemModalOpen(true);
   };
   const queryClient = useQueryClient();
+  const [page, setPage] = useState<number>(0); // Assuming 0-based index
+  const [pageSize, setPageSize] = useState<number>(10);
   //tanstack query for data fetching
-  const { data, isLoading, isError } = useGetAllItems();
+  const { data, isLoading, isError } = useGetAllItems(page + 1, pageSize);
 
   //updating fetched data into state
   useEffect(() => {
@@ -148,7 +156,7 @@ const index = () => {
     }
   }, [singleItemData]);
   //tanstack query for delete
-  const deleteMutation =useDeleteItem(queryClient);
+  const deleteMutation = useDeleteItem(queryClient);
   //delete handler
   const handleDelete = (id: string) => {
     if (confirm("Do you want to delete this item?")) {
@@ -296,15 +304,23 @@ const index = () => {
   //table instance creation
   const table = useReactTable({
     columns,
-    data: itemData, //,
+    data: itemData,
+    pageCount: data ? Math.ceil(data.count / pageSize) : 0,
+    state: {
+      pagination: { pageIndex: page, pageSize },
+    },
+    manualPagination: true, // Important to manually handle pagination //,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: () => setPage(table.getState().pagination.pageIndex),
   });
   //function to get zod error msg for specific field
   const getErrorMessage = (field: string) => {
     const error = zodErrors.find((err) => err.path.includes(field));
     return error ? error.message : null;
   }; //zod error ko alert box nk pya yan
+  console.log(page);
+
   return (
     <div className=" m-10">
       <Layout>
@@ -652,28 +668,40 @@ const index = () => {
             <div className=" flex items-center justify-center">
               <div className=" w-[75%] my-2 flex  items-center justify-center">
                 <button
-                  onClick={() => table.setPageIndex(0)}
+                  onClick={() => {
+                    table.setPageIndex(0);
+                    setPage(0);
+                  }}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
                 >
                   <MdKeyboardDoubleArrowLeft />
                 </button>
                 <button
                   disabled={!table.getCanPreviousPage()}
-                  onClick={() => table.previousPage()}
+                  onClick={() => {
+                    table.previousPage();
+                    setPage(table.getState().pagination.pageIndex - 1);
+                  }}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
                 >
                   <MdKeyboardArrowLeft />
                 </button>
                 <button
                   disabled={!table.getCanNextPage()}
-                  onClick={() => table.nextPage()}
+                  onClick={() => {
+                    table.nextPage();
+                    setPage(table.getState().pagination.pageIndex + 1);
+                  }}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
                 >
                   <MdKeyboardArrowRight />
                 </button>
 
                 <button
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  onClick={() => {
+                    table.setPageIndex(table.getPageCount() - 1);
+                    setPage(table.getPageCount() - 1);
+                  }}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
                 >
                   <MdKeyboardDoubleArrowRight />

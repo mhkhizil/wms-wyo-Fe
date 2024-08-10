@@ -4,12 +4,12 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getCookie } from "cookies-next";
 //tanstack query for getting all items
 const token = getCookie("token");
-export const useGetAllItems = () => {
+export const useGetAllItems = (page: number, limit: number) => {
   return useQuery<itemList, Error>({
-    queryKey: ["items"],
+    queryKey: ["items",page, limit],
     queryFn: async () => {
       const response = await fetch(
-        `https://api-wai.yethiha.com/items?limit=10&page=1`,
+        `https://api-wai.yethiha.com/items?limit=${limit}&page=${page}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
