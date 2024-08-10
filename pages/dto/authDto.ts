@@ -50,4 +50,6 @@ export type RegisterData = Omit<z.infer<typeof registerSchema>, 'confirmPassword
     linkPath:string,
     confirmPassword?:string
   }
-  
+  export type DecodedToken ={
+    exp: number; // Expiration time in seconds since the Unix epoch
+  }

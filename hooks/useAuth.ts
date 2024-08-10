@@ -1,6 +1,7 @@
-import { LoginData, LoginResponse } from "@/pages/dto/authDto";
+import { DecodedToken, LoginData, LoginResponse } from "@/pages/dto/authDto";
 import { useMutation } from "@tanstack/react-query";
 import { setCookie } from "cookies-next";
+import { jwtDecode } from "jwt-decode";
 
 export const useLogin = () => {
   return useMutation({
@@ -22,8 +23,15 @@ export const useLogin = () => {
     },
 
     onSuccess: (data) => {
+        // Decode the JWT token
+        const decodedToken: DecodedToken = jwtDecode(data.token);
+      
+        // Calculate the lifespan of the cookie
+        const maxAge = decodedToken.exp - Math.floor(Date.now() / 1000);
+        console.log(maxAge);
+        
       // Store the token in cookies
-      setCookie("token", data.token, { maxAge: 60 * 60 * 24 }); // Cookie valid for 1 day
+      setCookie("token", data.token,{ maxAge }); 
       alert("Login successful");
     },
 
