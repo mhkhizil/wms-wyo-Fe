@@ -1,16 +1,9 @@
 //To modiy =>
 // 1.zod error ko alert bar nk pya yan ,
-//3.table ko khwel
 //4.modal ko modify lk design kor component pr kwhel
-//5.logo htl 
-//6.side bar 
+//6.side bar
 //7 loader
-import {
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Layout from "../components/Layout";
@@ -20,8 +13,6 @@ import {
   getCoreRowModel,
   flexRender,
   getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
 } from "@tanstack/react-table";
 import { CiEdit } from "react-icons/ci";
 import { IoInformationCircleOutline } from "react-icons/io5";
@@ -35,17 +26,15 @@ import {
 import Loader from "../components/Loader";
 import InputModel from "../components/InputModel";
 import { item, itemList, NewItemData, newItemSchema } from "../dto/itemDto";
-import { useCreateItem, useDeleteItem, useGetAllItems, useGetItem, useUpdateItem } from "@/hooks/useItemData";
+import {
+  useCreateItem,
+  useDeleteItem,
+  useGetAllItems,
+  useGetItem,
+  useUpdateItem,
+} from "@/hooks/useItemData";
 import toast from "react-hot-toast";
-//type of data fetching from endpoint
-// export const newItemSchema = z.object({
-//   name: z.string().trim().min(1, "Name is required"),
-//   manufacturer: z.string().trim().min(1, "Manufacturer is required"),
-//   category: z.string().trim().min(1, "Category is required"),
-//   price: z.number().positive("Price must be positive"),
-//   remark: z.string().trim().min(1, "Remark is required"),
-// });
-// export type NewItemData = z.infer<typeof newItemSchema>;
+import TableFrame from "../components/TableFrame";
 const index = () => {
   //state for handling input modal
   const [isCreate, setIsCreate] = useState<boolean>(false);
@@ -119,7 +108,7 @@ const index = () => {
   const [page, setPage] = useState<number>(0); // Assuming 0-based index
   const [pageSize, setPageSize] = useState<number>(10);
   //tanstack query for data fetching
-  const { data, isLoading, isError } = useGetAllItems(page+1 , pageSize);
+  const { data, isLoading, isError } = useGetAllItems(page + 1, pageSize);
 
   //updating fetched data into state
   useEffect(() => {
@@ -152,36 +141,39 @@ const index = () => {
     }
   }, [singleItemData]);
   //tanstack query for delete
-  const deleteMutation =useDeleteItem(queryClient);
+  const deleteMutation = useDeleteItem(queryClient);
   //delete handler
   const handleDelete = (id: string) => {
-    toast((t) => (
-      <span>
-        Do you want to delete this item?
-        <button
-          onClick={() => {
-            deleteMutation.mutate(id);
-            toast.dismiss(t.id);
-          }}
-          className="ml-4 text-red-600 hover:underline"
-        >
-          Yes
-        </button>
-        <button
-          onClick={() => toast.dismiss(t.id)}
-          className="ml-4 text-green-600 hover:underline"
-        >
-          No
-        </button>
-      </span>
-    ), {
-      duration: Infinity,
-      style: {
-        background: "#141414",
-        color: "white",
-        padding: "12px",
+    toast(
+      (t) => (
+        <span>
+          Do you want to delete this item?
+          <button
+            onClick={() => {
+              deleteMutation.mutate(id);
+              toast.dismiss(t.id);
+            }}
+            className="ml-4 text-red-600 hover:underline"
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="ml-4 text-green-600 hover:underline"
+          >
+            No
+          </button>
+        </span>
+      ),
+      {
+        duration: Infinity,
+        style: {
+          background: "#141414",
+          color: "white",
+          padding: "12px",
+        },
       }
-    });
+    );
   };
   //model  handler
   const handleModel = () => {
@@ -321,27 +313,12 @@ const index = () => {
       ),
     },
   ];
-  //table instance creation
-  const table = useReactTable({
-    columns,
-    data: itemData,
-    pageCount: data?Math.ceil(data.count / pageSize):0,
-    state: {
-      pagination: { pageIndex: page, pageSize },
-    },
-    manualPagination: true, // Important to manually handle pagination //,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: (  ) => setPage(table.getState().pagination.pageIndex),
-  });
   //function to get zod error msg for specific field
   const getErrorMessage = (field: string) => {
     const error = zodErrors.find((err) => err.path.includes(field));
     return error ? error.message : null;
   }; //zod error ko alert box nk pya yan
-  console.log(page);
-    
-  
+
   return (
     <div className="">
       <Layout>
@@ -587,153 +564,48 @@ const index = () => {
             </form>
           )}
         </InputModel>
-       <div className=" my-5">
-       <div className=" my-3 flex item-center justify-center ">
-          <h1 className=" text-3xl  ">Items</h1>
-        </div>
-        <div className="  flex items-center justify-center">
-          <div className=" w-[75%]">
-            <div className="   my-4 flex  items-center justify-between">
-              <div className="w-[50%] flex items-center justify-around">
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className=" w-[70%] px-4 py-2 bg-transparent border border-slate-500 rounded-2xl  "
-                />
-                <button
-                  onClick={() => {
-                    setIsCreate(true);
-                    handleModel();
-                  }}
-                  className=" w-[25%] border border-slate-400 hover:bg-slate-400  rounded-2xl  px-4 py-2"
-                >
-                  Create
-                </button>
+        <div className=" my-5">
+          <div className=" my-3 flex item-center justify-center ">
+            <h1 className=" text-3xl  ">Items</h1>
+          </div>
+          <div className="  flex items-center justify-center">
+            <div className=" w-[75%]">
+              <div className="   my-4 flex  items-center justify-between">
+                <div className="w-[50%] flex items-center justify-around">
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    className=" w-[70%] px-4 py-2 bg-transparent border border-slate-500 rounded-2xl  "
+                  />
+                  <button
+                    onClick={() => {
+                      setIsCreate(true);
+                      handleModel();
+                    }}
+                    className=" w-[25%] border border-slate-400 hover:bg-slate-400  rounded-2xl  px-4 py-2"
+                  >
+                    Create
+                  </button>
+                </div>
+                <div className=" w-[10%] flex items-center justify-around">
+                  <p>filter </p>
+                  <p>sort </p>
+                </div>
+                <div className=" w-24"></div>
               </div>
-              <div className=" w-[10%] flex items-center justify-around">
-                <p>filter </p>
-                <p>sort </p>
-              </div>
-              <div className=" w-24"></div>
             </div>
           </div>
-        </div>
-
-        <div>
-          <div className=" flex item-center justify-center ">
-            <table className=" border border-slate-400  table-fixed w-[75%]">
-              <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup?.id}>
-                    {headerGroup?.headers?.map((header) => (
-                      <th
-                        onClick={header.column.getToggleSortingHandler()}
-                        key={header?.id}
-                        className=" border border-slate-400 p-6"
-                      >
-                        {header.isPlaceholder ? null : (
-                          <div>
-                            {flexRender(
-                              header?.column?.columnDef?.header,
-                              header.getContext()
-                            )}
-                            {
-                              // { asc: ` asc`, desc: ` desc` }[
-                              //   header.column.getIsSorted() ?? null
-                              // ]
-                            }
-                          </div>
-                        )}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              {itemData.length > 0 ? (
-                <tbody>
-                  {table?.getRowModel()?.rows?.map((row) => {
-                    return (
-                      <tr key={row?.id}>
-                        {row.getVisibleCells().map((cell) => {
-                          return (
-                            <td
-                              key={cell?.id}
-                              className=" border border-slate-400 p-4"
-                            >
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              ) : (
-                <tbody>
-                  <tr>
-                    <td colSpan={columns.length} className="border-none py-10">
-                      <div className=" w-[100%] flex items-center justify-center">
-                        <p className="text-white text-center">
-                          There is currently no item! Please create items
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              )}
-            </table>
+       
+            <TableFrame
+              columns={columns}
+              itemData={itemData}
+              data={data}
+              page={page}
+              pageSize={pageSize}
+              setPage={setPage}
+            />
           </div>
-          {itemData.length > 0 ? (
-            <div className=" flex items-center justify-center">
-              <div className=" w-[75%] my-2 flex  items-center justify-center">
-                <button
-                  onClick={() => {table.setPageIndex(0);
-                    setPage(0);
-                  }}
-                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                >
-                  <MdKeyboardDoubleArrowLeft />
-                </button>
-                <button
-                  disabled={!table.getCanPreviousPage()}
-                  onClick={() => {
-                    table.previousPage();
-                    setPage(table.getState().pagination.pageIndex - 1);
-                }}
-                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                >
-                  <MdKeyboardArrowLeft />
-                </button>
-                <button
-                  disabled={!table.getCanNextPage()}
-                  onClick={() => {
-                    table.nextPage();
-                    setPage(table.getState().pagination.pageIndex + 1);
-                }}
-                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                >
-                  <MdKeyboardArrowRight />
-                </button>
-
-                <button
-                  onClick={() => {
-                            table.setPageIndex(table.getPageCount() - 1);
-                            setPage(table.getPageCount() - 1);
-                        }}
-                  className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
-                >
-                  <MdKeyboardDoubleArrowRight />
-                </button>
-              </div>
-            </div>
-          ) : (
-            ""
-          )}
-        </div>
-       </div>
+     
       </Layout>
     </div>
   );
