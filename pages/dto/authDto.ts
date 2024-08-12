@@ -31,6 +31,7 @@ export type RegisterData = Omit<z.infer<typeof registerSchema>, 'confirmPassword
 
 
  export  type AuthFormProps= {
+  isPending:boolean,
   registerData?:RegisterData,
     loginData?:LoginData,
     handleSubmit: (e: React.FormEvent) => void,

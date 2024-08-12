@@ -1,9 +1,12 @@
+
 import React, { ChangeEvent, useState } from 'react'
 import AuthForm from '../components/AuthForm'
 import { useRouter } from 'next/router';
 import { useLogin, useRegister } from '@/hooks/useAuth';
 import { getCookie } from 'cookies-next';
 import { loginSchema, registerSchema } from '../dto/authDto';
+import { Mutation } from '@tanstack/react-query';
+import Loader from '../components/Loader';
 
 const index = () => {
 const [registerData,setRegisterData]=useState({
@@ -27,12 +30,13 @@ const handleInputChange = (
     });
   }
 };
-  const { mutate: register, isError, error } = useRegister(); // Destructure the mutate function and states from useLogin
+  const { mutate: register, isPending, error } = useRegister(); // Destructure the mutate function and states from useLogin
   const router = useRouter();
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     const {email,name,password,}=registerData
        // Zod validation
        const validationResult = registerSchema.safeParse({ email, password,name,confirmPassword });
@@ -64,8 +68,8 @@ const handleInputChange = (
   };
   return (
     <div className="h-screen w-screen flex justify-center items-center " >
-     
-     <AuthForm confirmPassword={confirmPassword} title='Register' switchPageSentence='Already have an account?' linkText='  Login' linkPath='/login' registerData={registerData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} error ={error} validationError={errors} />
+        
+     <AuthForm isPending={isPending} confirmPassword={confirmPassword} title='Register' switchPageSentence='Already have an account?' linkText='  Login' linkPath='/login' registerData={registerData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} error ={error} validationError={errors} />
     </div>
   )
 }

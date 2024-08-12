@@ -566,7 +566,7 @@ const index = () => {
         </InputModel>
         <div className=" my-5">
           <div className=" my-3 flex item-center justify-center ">
-            <h1 className=" text-3xl  ">Items</h1>
+            <h1 className=" text-3xl  ">Items</h1>    
           </div>
           <div className="  flex items-center justify-center">
             <div className=" w-[75%]">

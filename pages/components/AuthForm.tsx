@@ -1,8 +1,11 @@
+'use client'
 import React from "react";
 import { AuthFormProps } from "../dto/authDto";
 import Link from "next/link";
+import Loader from "./Loader";
 
 const AuthForm: React.FC<AuthFormProps> = ({
+  isPending,
   registerData,
  loginData,
   handleSubmit,
@@ -16,8 +19,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
   confirmPassword
 
 }) => {
-  console.log(registerData);
-  console.log(confirmPassword);
+ 
   
   
   return (
@@ -75,6 +77,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
           </div>
           {registerData && (
               <div className="grid w-full items-center gap-1.5">
+        
               <input
                 className=" px-2 w-full rounded-xl placeholder-c-white block bg-transparent border focus:outline-none py-3"
                 required
@@ -92,8 +95,8 @@ const AuthForm: React.FC<AuthFormProps> = ({
           )}
        
           <div className="w-full">
-            <button className="w-full bg-white text-black  rounded-2xl py-3">
-              {title}
+            <button className="w-full bg-white text-black  rounded-2xl py-5">
+              {!isPending?title:<Loader color={"black"} size={"20"}/>}
             </button>
           </div>
         </form>

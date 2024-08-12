@@ -23,7 +23,9 @@ const handleInputChange = (
     [name]: value,
   });
 };
-  const { mutate: login, isError, error } = useLogin(); // Destructure the mutate function and states from useLogin
+ // Destructure the mutate function and states from useLogin
+  const { mutate: login, isPending, error } = useLogin(); 
+ 
   const router = useRouter();
 
 
@@ -61,7 +63,7 @@ const handleInputChange = (
   };
   return (
     <div className="h-screen w-screen flex justify-center items-center " >
-      <AuthForm title='Login' switchPageSentence='Need to create an account?' linkText='Create Account' linkPath='/register' loginData={loginData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} error ={error} validationError={errors} />
+      <AuthForm isPending={isPending} title='Login' switchPageSentence='Need to create an account?' linkText='Create Account' linkPath='/register' loginData={loginData} handleInputChange={handleInputChange} handleSubmit={handleSubmit} error ={error} validationError={errors} />
     </div>
   )
 }
