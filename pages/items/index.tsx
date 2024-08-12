@@ -1,7 +1,11 @@
 //To modiy =>
 // 1.zod error ko alert bar nk pya yan ,
 // 2.suceess mssage twy ll tt tt yat yat pya yan,
-//
+//3.table ko khwel
+//4.modal ko modify lk design kor component pr kwhel
+//5.logo htl 
+//6.side bar 
+//7 loader
 import {
   QueryClient,
   useMutation,
@@ -31,16 +35,9 @@ import {
 } from "react-icons/md";
 import Loader from "../components/Loader";
 import InputModel from "../components/InputModel";
-import { Slide, toast } from "react-toastify";
-
 import { item, itemList, NewItemData, newItemSchema } from "../dto/itemDto";
-import {
-  useCreateItem,
-  useDeleteItem,
-  useGetAllItems,
-  useGetItem,
-  useUpdateItem,
-} from "@/hooks/useItemData";
+import { useCreateItem, useDeleteItem, useGetAllItems, useGetItem, useUpdateItem } from "@/hooks/useItemData";
+import toast from "react-hot-toast";
 //type of data fetching from endpoint
 // export const newItemSchema = z.object({
 //   name: z.string().trim().min(1, "Name is required"),
@@ -123,7 +120,7 @@ const index = () => {
   const [page, setPage] = useState<number>(0); // Assuming 0-based index
   const [pageSize, setPageSize] = useState<number>(10);
   //tanstack query for data fetching
-  const { data, isLoading, isError } = useGetAllItems(page + 1, pageSize);
+  const { data, isLoading, isError } = useGetAllItems(page+1 , pageSize);
 
   //updating fetched data into state
   useEffect(() => {
@@ -156,12 +153,36 @@ const index = () => {
     }
   }, [singleItemData]);
   //tanstack query for delete
-  const deleteMutation = useDeleteItem(queryClient);
+  const deleteMutation =useDeleteItem(queryClient);
   //delete handler
   const handleDelete = (id: string) => {
-    if (confirm("Do you want to delete this item?")) {
-      deleteMutation.mutate(id);
-    }
+    toast((t) => (
+      <span>
+        Do you want to delete this item?
+        <button
+          onClick={() => {
+            deleteMutation.mutate(id);
+            toast.dismiss(t.id);
+          }}
+          className="ml-4 text-red-600 hover:underline"
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => toast.dismiss(t.id)}
+          className="ml-4 text-green-600 hover:underline"
+        >
+          No
+        </button>
+      </span>
+    ), {
+      duration: Infinity,
+      style: {
+        background: "#141414",
+        color: "white",
+        padding: "12px",
+      }
+    });
   };
   //model  handler
   const handleModel = () => {
@@ -305,14 +326,14 @@ const index = () => {
   const table = useReactTable({
     columns,
     data: itemData,
-    pageCount: data ? Math.ceil(data.count / pageSize) : 0,
+    pageCount: data?Math.ceil(data.count / pageSize):0,
     state: {
       pagination: { pageIndex: page, pageSize },
     },
     manualPagination: true, // Important to manually handle pagination //,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: () => setPage(table.getState().pagination.pageIndex),
+    onPaginationChange: (  ) => setPage(table.getState().pagination.pageIndex),
   });
   //function to get zod error msg for specific field
   const getErrorMessage = (field: string) => {
@@ -320,7 +341,8 @@ const index = () => {
     return error ? error.message : null;
   }; //zod error ko alert box nk pya yan
   console.log(page);
-
+    
+  
   return (
     <div className=" m-10">
       <Layout>
@@ -668,8 +690,7 @@ const index = () => {
             <div className=" flex items-center justify-center">
               <div className=" w-[75%] my-2 flex  items-center justify-center">
                 <button
-                  onClick={() => {
-                    table.setPageIndex(0);
+                  onClick={() => {table.setPageIndex(0);
                     setPage(0);
                   }}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
@@ -681,7 +702,7 @@ const index = () => {
                   onClick={() => {
                     table.previousPage();
                     setPage(table.getState().pagination.pageIndex - 1);
-                  }}
+                }}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
                 >
                   <MdKeyboardArrowLeft />
@@ -691,7 +712,7 @@ const index = () => {
                   onClick={() => {
                     table.nextPage();
                     setPage(table.getState().pagination.pageIndex + 1);
-                  }}
+                }}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
                 >
                   <MdKeyboardArrowRight />
@@ -699,9 +720,9 @@ const index = () => {
 
                 <button
                   onClick={() => {
-                    table.setPageIndex(table.getPageCount() - 1);
-                    setPage(table.getPageCount() - 1);
-                  }}
+                            table.setPageIndex(table.getPageCount() - 1);
+                            setPage(table.getPageCount() - 1);
+                        }}
                   className="mx-1 border border-slate-400 hover:bg-slate-400 px-4 py-2"
                 >
                   <MdKeyboardDoubleArrowRight />

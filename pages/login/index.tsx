@@ -5,6 +5,8 @@ import { useLogin } from '@/hooks/useAuth';
 import { getCookie } from 'cookies-next';
 import { loginSchema } from '../dto/authDto';
 
+
+
 const index = () => {
 const [loginData,setLoginData]=useState({
   email:'',
@@ -45,7 +47,10 @@ const handleInputChange = (
       loginData, // Pass the login data to the mutate function
       {
         onSuccess: () => {
-          router.push('/'); // Redirect to the dashboard on successful login
+         
+          router.push('/');
+          
+          // Redirect to the dashboard on successful login
         },
       }
     );

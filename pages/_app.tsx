@@ -4,6 +4,8 @@ import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { isAuthenticated } from "./util/authRelated";
+import { Toaster } from "react-hot-toast";
+
 
 const queryClient = new QueryClient()
 
@@ -20,8 +22,14 @@ export default function App({ Component, pageProps }: AppProps) {
     }
   }, [router]);
   return(
-    <QueryClientProvider client={queryClient}>
+ 
+  <>
+<Toaster/>
+     <QueryClientProvider client={queryClient}>
+    
     <Component {...pageProps} />
     </QueryClientProvider>
+  </>
+  
   ) 
 }

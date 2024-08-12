@@ -1,12 +1,14 @@
 import { item, itemList, NewItemData } from "@/pages/dto/itemDto";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { error } from "console";
 import { getCookie } from "cookies-next";
+import toast from "react-hot-toast";
 //tanstack query for getting all items
 const token = getCookie("token");
 export const useGetAllItems = (page: number, limit: number) => {
   return useQuery<itemList, Error>({
-    queryKey: ["items",page, limit],
+    queryKey: ["items", page, limit],
     queryFn: async () => {
       const response = await fetch(
         `https://api-wai.yethiha.com/items?limit=${limit}&page=${page}`,
@@ -74,9 +76,26 @@ export const useDeleteItem = (queryClient: any) => {
         queryKey: ["items"],
         refetchType: "active",
       });
+      toast.success("Item deleted!", {
+        duration: 5000,
+        position: "bottom-right",
+        style: {
+          background: "#141414",
+          color: "white",
+          padding: "12px",
+        },
+      });
     },
-    onError: () => {
-      alert("error");
+    onError: (error) => {
+      toast.error(error.message, {
+        duration: 5000,
+        position: "bottom-right",
+        style: {
+          background: "#141414",
+          color: "white",
+          padding: "12px",
+        },
+      });
     },
   });
 };
@@ -92,10 +111,8 @@ export const useCreateItem = (queryClient: any) => {
         body: JSON.stringify(newItemData),
       });
 
-      console.log(response);
-
       if (!response.ok) {
-        throw new Error("Failed to delete item");
+        throw new Error("Failed to create item");
       }
 
       return response;
@@ -106,10 +123,26 @@ export const useCreateItem = (queryClient: any) => {
         queryKey: ["items"],
         refetchType: "active",
       });
-      alert("Item created");
+      toast.success("Item created!", {
+        duration: 5000,
+        position: "bottom-right",
+        style: {
+          background: "#141414",
+          color: "white",
+          padding: "12px",
+        },
+      });
     },
-    onError: () => {
-      alert("error:");
+    onError: (error) => {
+      toast.error(error.message, {
+        duration: 5000,
+        position: "bottom-right",
+        style: {
+          background: "#141414",
+          color: "white",
+          padding: "12px",
+        },
+      });
     },
   });
 };
@@ -143,10 +176,26 @@ export const useUpdateItem = (queryClient: any) => {
         queryKey: ["items"],
         refetchType: "active",
       });
-      alert("Item updated successfully");
+      toast.success("Item updated!", {
+        duration: 5000,
+        position: "bottom-right",
+        style: {
+          background: "#141414",
+          color: "white",
+          padding: "12px",
+        },
+      });
     },
-    onError: () => {
-      alert("Failed to update item");
+    onError: (error) => {
+      toast.error(error.message, {
+        duration: 5000,
+        position: "bottom-right",
+        style: {
+          background: "#141414",
+          color: "white",
+          padding: "12px",
+        },
+      });
     },
   });
 };

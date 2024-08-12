@@ -90,7 +90,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
             )}
             </div>
           )}
-          {error instanceof Error ? error.message : ""}
+       
           <div className="w-full">
             <button className="w-full bg-white text-black  rounded-2xl py-3">
               {title}
