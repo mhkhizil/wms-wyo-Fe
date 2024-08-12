@@ -1,6 +1,5 @@
 //To modiy =>
 // 1.zod error ko alert bar nk pya yan ,
-// 2.suceess mssage twy ll tt tt yat yat pya yan,
 //3.table ko khwel
 //4.modal ko modify lk design kor component pr kwhel
 //5.logo htl 
@@ -344,7 +343,7 @@ const index = () => {
     
   
   return (
-    <div className=" m-10">
+    <div className="">
       <Layout>
         <InputModel
           title={isCreate ? "Create Item" : isShow ? "Item" : ""}
@@ -588,7 +587,8 @@ const index = () => {
             </form>
           )}
         </InputModel>
-        <div className=" my-3 flex item-center justify-center ">
+       <div className=" my-5">
+       <div className=" my-3 flex item-center justify-center ">
           <h1 className=" text-3xl  ">Items</h1>
         </div>
         <div className="  flex items-center justify-center">
@@ -733,6 +733,7 @@ const index = () => {
             ""
           )}
         </div>
+       </div>
       </Layout>
     </div>
   );
