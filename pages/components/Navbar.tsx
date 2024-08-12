@@ -3,7 +3,7 @@ import React from "react";
 import { IoMdMenu } from "react-icons/io";
 import nzAutoLogo from "@/public/pnglogo-1.png"
 import avaterIcon from "@/public/avater-icon.jpg"
-import { BiUser } from "react-icons/bi";
+import { BiUser, BiUserCircle } from "react-icons/bi";
 const Navbar = () => {
   return (
     <div className=" shadow-lg shadow-white  bg-[#0c0b0b] mb-10  flex items-center justify-between">
@@ -18,7 +18,7 @@ const Navbar = () => {
       </div>
       <div className="  flex items-center justify-center">
       
-          <BiUser className="w-[30px] h-[30px] mx-8"/>
+          <BiUserCircle className="w-[40px] h-[40px] mx-8"/>
           
         </div>
     </div>
