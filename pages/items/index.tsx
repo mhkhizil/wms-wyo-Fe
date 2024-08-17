@@ -2,7 +2,6 @@
 // 1.zod error ko alert bar nk pya yan ,
 //4.modal ko modify lk design kor component pr kwhel
 //6.side bar
-//7 loader
 import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
@@ -17,31 +16,25 @@ import {
 import { CiEdit } from "react-icons/ci";
 import { IoInformationCircleOutline } from "react-icons/io5";
 import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-  MdKeyboardDoubleArrowLeft,
-  MdKeyboardDoubleArrowRight,
+  MdDelete
 } from "react-icons/md";
-import Loader from "../components/Loader";
 import InputModel from "../components/InputModel";
-import { item, itemList, NewItemData, newItemSchema } from "../dto/itemDto";
+import { item, NewItemData, newItemSchema } from "../dto/itemDto";
 import {
   useCreateItem,
   useDeleteItem,
   useGetAllItems,
-  useGetItem,
   useUpdateItem,
 } from "@/hooks/useItemData";
 import toast from "react-hot-toast";
 import TableFrame from "../components/TableFrame";
+import { useRouter } from "next/router";
 const index = () => {
+  const router =useRouter();
   //state for handling input modal
   const [isCreate, setIsCreate] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isShow, setIsShow] = useState<boolean>(false);
-  //state for getting itemID for single item fetch
-  const [itemId, setItemId] = useState<string | null>(null);
   //item id for edit
   const [editItemId, setEditItemId] = useState<string>("");
   //zod error handling state
@@ -50,14 +43,6 @@ const index = () => {
   const [itemData, setItemData] = useState<item[]>([]);
   //item data state for creating
   const [newItemData, setNewItemData] = useState<NewItemData>({
-    name: "",
-    manufacturer: "",
-    category: "",
-    price: 0,
-    remark: "",
-  });
-  //item data state for fetching single item
-  const [singleItem, SetSingleItem] = useState<NewItemData>({
     name: "",
     manufacturer: "",
     category: "",
@@ -109,37 +94,12 @@ const index = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   //tanstack query for data fetching
   const { data, isLoading, isError } = useGetAllItems(page + 1, pageSize);
-
   //updating fetched data into state
   useEffect(() => {
     if (data) {
       setItemData(data?.items);
     }
   }, [data]);
-
-  //tanstack query for get individual item
-  const {
-    data: singleItemData,
-    isLoading: isSingleItemLoading,
-    isError: isSingleItemError,
-  } = useGetItem(itemId);
-
-  //state updator function that will update the itemId state so that useQuery will run for individual item
-  const getItem = (id: string) => {
-    setItemId(id);
-  };
-  //showing item handler
-  const handleShowItem = (id: string) => {
-    getItem(id);
-    setIsShow(true);
-    handleModel();
-  };
-  //useEffect for insertng data into state
-  useEffect(() => {
-    if (singleItemData) {
-      SetSingleItem(singleItemData);
-    }
-  }, [singleItemData]);
   //tanstack query for delete
   const deleteMutation = useDeleteItem(queryClient);
   //delete handler
@@ -301,7 +261,8 @@ const index = () => {
             <CiEdit />
           </button>
           <button
-            onClick={() => handleShowItem(row.row.original.id)}
+          // handleShowItem(row.row.original.id)
+            onClick={() => router.push(`/items/${row.row.original.id}`) }
             className=" p-3 hover:text-amber-400"
           >
             <IoInformationCircleOutline />
@@ -322,6 +283,7 @@ const index = () => {
   return (
     <div className="">
       <Layout>
+        {/* <DetailComponent singleItem={singleItem}/> */}
         <InputModel
           title={isCreate ? "Create Item" : isShow ? "Item" : ""}
           isOpen={isCreateItemModalOpen}
@@ -417,54 +379,7 @@ const index = () => {
               </div>
             </form>
           )}
-          {isShow && (
-            <div>
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-40">
-                  Item Name:
-                </label>
-                <p className=" w-40  ">{singleItem?.name}</p>
-              </div>
-
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-40  ">
-                  Manufacturer:
-                </label>
-                <p className=" w-40  ">{singleItem?.manufacturer}</p>
-              </div>
-
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-40  ">
-                  Category:
-                </label>
-                <p className=" w-40  ">{singleItem?.category}</p>
-              </div>
-
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-40  ">
-                  Price:
-                </label>
-                <p className=" w-40  ">
-                  {singleItem?.price.toLocaleString("en-US")} Ks
-                </p>
-              </div>
-
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-40  ">
-                  Remark:
-                </label>
-                <p className=" w-40  ">{singleItem?.remark}</p>
-              </div>
-              <div className=" w-[100%]">
-                <button
-                  onClick={closeCreateItemModal}
-                  className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          )}
+      
           {isEdit && (
             <form
               action=""

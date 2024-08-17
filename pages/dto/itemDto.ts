@@ -23,3 +23,7 @@ export const newItemSchema = z.object({
     remark: z.string().trim().min(1, "Remark is required"),
   });
   export type NewItemData = z.infer<typeof newItemSchema>;
+  export type propNewItemData={
+    singleItem:NewItemData,
+    handleButton:()=>void
+  }

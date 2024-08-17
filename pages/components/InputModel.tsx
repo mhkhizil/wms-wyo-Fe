@@ -32,10 +32,10 @@ const InputModel: React.FC<ModalProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
            
-            className=" fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none"
           >
             <div className="relative w-auto max-w-3xl mx-auto my-6">
-              <div className="relative bg-black  flex flex-col w-full  border-0 rounded-lg shadow-lg outline-none focus:outline-none">
+              <div className="  rounded-2xl relative bg-black  flex flex-col w-full  border-0  shadow-lg outline-none focus:outline-none">
                 <div className="flex items-center justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
                   <h3 className="text-lg font-semibold text-white flex-grow text-center">
                     {title}
