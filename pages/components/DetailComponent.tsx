@@ -20,19 +20,19 @@ const DetailComponent = ({ singleItem, handleButton }: propNewItemData) => {
                 src={""}
                 alt=""
               />
-              <div
+              {/* <div
                 // onClick={() => editImage.click()}
                 className={`flex justify-center cursor-pointer absolute bg-[#f5f5f5] right-3  bottom-1 items-center text-xs gap-1 border-2 rounded-full w-8 h-8 px-1 py-0.5`}
               >
                 <MdOutlineEdit className="text-slate-700" />
                 <input className="file hidden" type="file" name="" id="" />
-              </div>
+              </div> */}
             </div>
             <div className={`flex items-center justify-between mx-10 ml-52`}>
               <div className={``}>
                 <h2>{""}</h2>
                 <div className=" my-4 block">
-                  <p className="inline">Sale Price:</p>{" "}
+                  <p className="inline">Sale Price:</p>
                   <span className=" inline">
                     {singleItem.price.toLocaleString("en-US")}
                   </span>{" "}
