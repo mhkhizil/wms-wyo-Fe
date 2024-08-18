@@ -5,12 +5,14 @@ import nzAutoLogo from "@/public/pnglogo-1.png"
 import avaterIcon from "@/public/avater-icon.jpg"
 import { BiUser, BiUserCircle } from "react-icons/bi";
 import Loader from "./Loader";
-const Navbar = () => {
+const Navbar = ({ toggleSidebar , isSidebarOpen }: { toggleSidebar: () => void ,isSidebarOpen: boolean}) => {
   return (
     <div className=" shadow-lg shadow-white  bg-[#0c0b0b] mb-10  flex items-center justify-between">
       <div className=" flex items-center justify-around">
         <div>
-          <p className=" text-4xl p-4"><IoMdMenu /></p>
+          <p className={` text-4xl p-4 hover:cursor-pointer hover:opacity-70 transform transition-transform duration-300 ${
+              isSidebarOpen ? "rotate-90" : "rotate-0"
+            }`}  onClick={toggleSidebar}><IoMdMenu /></p>
         </div>
         <div className=" flex items-center justify-evenly">
         <Image src={nzAutoLogo} alt="Logo" width={120} height={60}/>
