@@ -1,11 +1,7 @@
-//To modiy =>
-// 1.zod error ko alert bar nk pya yan ,
-//6.side bar
 import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Layout from "../components/Layout";
-
 import { item, NewItemData, newItemSchema } from "../dto/itemDto";
 import {
   useCreateItem,
@@ -79,7 +75,7 @@ const index = () => {
   const [page, setPage] = useState<number>(0); // Assuming 0-based index
   const [pageSize] = useState<number>(10);
   //tanstack query for data fetching
-  const { data, isLoading, isError } = useGetAllItems(page + 1, pageSize);
+  const { data } = useGetAllItems(page + 1, pageSize);
   //updating fetched data into state
   useEffect(() => {
     if (data) {
@@ -125,7 +121,6 @@ const index = () => {
   const handleModel = () => {
     openCreateItemModal();
   };
-
   //tanstack query mutation for create
   const createMutation = useCreateItem(queryClient);
   //create Handler
@@ -191,7 +186,6 @@ const index = () => {
     const error = zodErrors.find((err) => err.path.includes(field));
     return error ? error.message : null;
   }; //zod error ko alert box nk pya yan
-
   return (
     <div className="">
       <Layout>
@@ -282,7 +276,6 @@ const index = () => {
               </div>
             </div>
           </div>
-
           <TableFrame
             columns={columns}
             itemData={itemData}

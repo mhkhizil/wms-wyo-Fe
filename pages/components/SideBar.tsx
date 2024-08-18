@@ -1,6 +1,4 @@
 import React from "react";
-import { IoMdHome, IoMdClose } from "react-icons/io";
-import { BiUser, BiCog } from "react-icons/bi";
 import { MdDashboard } from "react-icons/md";
 import { FiLogOut } from "react-icons/fi";
 import { FaTools } from "react-icons/fa";
