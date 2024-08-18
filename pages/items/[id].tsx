@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react'
 import DetailComponent from '../components/DetailComponent';
 import { useGetItem } from '@/hooks/useItemData';
 import { NewItemData } from '../dto/itemDto';
-import { any } from 'zod';
 import Layout from '../components/Layout';
-
 const ItemDetail = () => {
     const router = useRouter();
     const { id } = router.query;

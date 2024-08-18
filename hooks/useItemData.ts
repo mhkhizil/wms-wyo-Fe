@@ -33,7 +33,7 @@ export const useGetAllItems = (page: number, limit: number) => {
   });
 };
 //tanstack query for get individual item
-export const useGetItem = (itemId: string | null) => {
+export const useGetItem = (itemId?: string |string[]) => {
   return useQuery<item, Error>({
     queryKey: ["item", itemId],
     queryFn: async ({ queryKey }) => {
