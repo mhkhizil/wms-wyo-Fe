@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Layout from "../components/Layout";
-import InputModel from "../components/InputModel";
+
 import { item, NewItemData, newItemSchema } from "../dto/itemDto";
 import {
   useCreateItem,
@@ -16,6 +16,8 @@ import {
 import toast from "react-hot-toast";
 import TableFrame from "../components/TableFrame";
 import { itemColumns } from "../components/itemsCompo/ItemColumnDef";
+// import InputModel from "../components/InputModel";
+import InputModel from "../components/InputModel";
 const index = () => {
   //state for handling input modal
   const [isCreate, setIsCreate] = useState<boolean>(false);
@@ -75,7 +77,7 @@ const index = () => {
   };
   const queryClient = useQueryClient();
   const [page, setPage] = useState<number>(0); // Assuming 0-based index
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize] = useState<number>(10);
   //tanstack query for data fetching
   const { data, isLoading, isError } = useGetAllItems(page + 1, pageSize);
   //updating fetched data into state
@@ -137,7 +139,6 @@ const index = () => {
       closeCreateItemModal();
       setIsCreate(false);
       setIsEdit(false);
-      setIsShow(false);
       setNewItemData({
         name: "",
         manufacturer: "",
@@ -199,206 +200,57 @@ const index = () => {
           title={isCreate ? "Create Item" : isEdit ? "Edit Item" : ""}
           isOpen={isCreateItemModalOpen}
           onClose={closeCreateItemModal}
-        >
-          {isCreate && (
-            <form action="" onSubmit={(e) => handleCreate(newItemData, e)}>
-              <div className=" mb-8">
-                <div className=" flex items-center justify-center m-4 ">
-                  <label htmlFor="" className=" w-[50%]">
-                    Item Name:
-                  </label>
-                  <input
-                    name="name"
-                    onChange={handleInputChange}
-                    type="text"
-                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                  />
-                </div>
-                {getErrorMessage("name") && (
-                  <div className="text-red-600 text-center">
-                    {getErrorMessage("name")}
-                  </div>
-                )}
-              </div>
-              <div className="mb-8">
-                <div className=" flex items-center justify-center m-4 ">
-                  <label htmlFor="" className=" w-[50%]">
-                    Manufacturer:
-                  </label>
-                  <input
-                    name="manufacturer"
-                    onChange={handleInputChange}
-                    type="text"
-                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                  />
-                </div>
-                {getErrorMessage("manufacturer") && (
-                  <div className="text-red-600 text-center ms-12">
-                    {getErrorMessage("manufacturer")}
-                  </div>
-                )}
-              </div>
-              <div  className="mb-8">
-                <div className=" flex items-center justify-center m-4 ">
-                  <label htmlFor="" className=" w-[50%]">
-                    Category:
-                  </label>
-                  <input
-                    name="category"
-                    onChange={handleInputChange}
-                    type="text"
-                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                  />
-                </div>
-                {getErrorMessage("category") && (
-                  <div className="text-red-600 text-center ms-3">
-                    {getErrorMessage("category")}
-                  </div>
-                )}
-              </div>
-              <div  className="mb-8">
-                <div className=" flex items-center justify-center m-4 ">
-                  <label htmlFor="" className=" w-[50%]">
-                    Price:
-                  </label>
-                  <input
-                    name="price"
-                    onChange={handleInputChange}
-                    type="text"
-                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                  />
-                </div>
-                {getErrorMessage("price") && (
-                  <div className="text-red-600 text-center ms-6">
-                    {getErrorMessage("price")}
-                  </div>
-                )}
-              </div>
-              <div  className="mb-8">
-                <div className=" flex items-center justify-center m-4 ">
-                  <label htmlFor="" className=" w-[50%]">
-                    Remark:
-                  </label>
-                  <input
-                    name="remark"
-                    onChange={handleInputChange}
-                    type="text"
-                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                  />
-                </div>
-                {getErrorMessage("remark") && (
-                  <div className="text-red-600  flex items-center justify-center">
-                    {getErrorMessage("remark")}
-                  </div>
-                )}
-              </div>
-              <div className=" w-[100%]">
-                <button className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3">
-                  Create
-                </button>
-              </div>
-            </form>
-          )}
-
-          {isEdit && (
-            <form
-              action=""
-              onSubmit={(e) => handleEdit(e, editItemId, editItemData)}
-            >
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Item Name:
-                </label>
-                <input
-                  value={editItemData?.name}
-                  name="name"
-                  onChange={(e) => handleInputChange(e, isEdit)}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
-              </div>
-              {getErrorMessage("name") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("name")}
-                </div>
-              )}
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Manufacturer:
-                </label>
-                <input
-                  value={editItemData?.manufacturer}
-                  name="manufacturer"
-                  onChange={(e) => handleInputChange(e, isEdit)}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
-              </div>
-              {getErrorMessage("manufacturer") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("manufacturer")}
-                </div>
-              )}
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Category:
-                </label>
-                <input
-                  value={editItemData?.category}
-                  name="category"
-                  onChange={(e) => handleInputChange(e, isEdit)}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
-              </div>
-              {getErrorMessage("category") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("category")}
-                </div>
-              )}
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Price:
-                </label>
-                <input
-                  value={editItemData?.price}
-                  name="price"
-                  onChange={(e) => handleInputChange(e, isEdit)}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
-              </div>
-              {getErrorMessage("price") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("price")}
-                </div>
-              )}
-
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Remark:
-                </label>
-                <input
-                  value={editItemData?.remark}
-                  name="remark"
-                  onChange={(e) => handleInputChange(e, isEdit)}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
-              </div>
-              {getErrorMessage("remark") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("remark")}
-                </div>
-              )}
-              <div className=" w-[100%]">
-                <button className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3">
-                  Create
-                </button>
-              </div>
-            </form>
-          )}
-        </InputModel>
+          inputFields={[
+            {
+              label: "Item Name",
+              name: "name",
+              value: isEdit ? editItemData.name : newItemData.name,
+              type: "text",
+              onChange: (e) => handleInputChange(e, isEdit),
+              error: getErrorMessage("name"),
+            },
+            {
+              label: "Manufacturer",
+              name: "manufacturer",
+              value: isEdit
+                ? editItemData.manufacturer
+                : newItemData.manufacturer,
+              type: "text",
+              onChange: (e) => handleInputChange(e, isEdit),
+              error: getErrorMessage("manufacturer"),
+            },
+            {
+              label: "Category",
+              name: "category",
+              value: isEdit ? editItemData.category : newItemData.category,
+              type: "text",
+              onChange: (e) => handleInputChange(e, isEdit),
+              error: getErrorMessage("category"),
+            },
+            {
+              label: "Price",
+              name: "price",
+              value: isEdit ? editItemData.price : newItemData.price,
+              type: "text",
+              onChange: (e) => handleInputChange(e, isEdit),
+              error: getErrorMessage("price"),
+            },
+            {
+              label: "Remark",
+              name: "remark",
+              value: isEdit ? editItemData.remark : newItemData.remark,
+              type: "text",
+              onChange: (e) => handleInputChange(e, isEdit),
+              error: getErrorMessage("remark"),
+            },
+          ]}
+          onSubmit={
+            isCreate
+              ? (e) => handleCreate(newItemData, e)
+              : (e) => handleEdit(e, editItemId, editItemData)
+          }
+          submitButtonLabel={isCreate ? "Create" : "Update"}
+        />
         <div className=" my-5">
           <div className=" my-3 flex item-center justify-center ">
             <h1 className=" text-3xl  ">Items</h1>
