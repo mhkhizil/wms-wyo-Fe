@@ -36,7 +36,7 @@ const InputModel: React.FC<ModalProps> = ({
           >
             <div className="relative w-auto max-w-3xl mx-auto my-6">
               <div className="  rounded-2xl relative bg-black  flex flex-col w-full  border-0  shadow-lg outline-none focus:outline-none">
-                <div className="flex items-center justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
+                <div className="flex items-center justify-between p-10 border-b border-solid border-blueGray-200 rounded-t">
                   <h3 className="text-lg font-semibold text-white flex-grow text-center">
                     {title}
                   </h3>
@@ -50,7 +50,7 @@ const InputModel: React.FC<ModalProps> = ({
                     </span>
                   </button>
                 </div>
-                <div className="relative p-6 flex-auto">{children}</div>
+                <div className="relative p-20 flex-auto">{children}</div>
               </div>
             </div>
           </motion.div>

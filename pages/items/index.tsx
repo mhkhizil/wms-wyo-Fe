@@ -1,23 +1,10 @@
 //To modiy =>
 // 1.zod error ko alert bar nk pya yan ,
-//4.modal ko modify lk design kor component pr kwhel
 //6.side bar
 import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Layout from "../components/Layout";
-import {
-  ColumnDef,
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  getPaginationRowModel,
-} from "@tanstack/react-table";
-import { CiEdit } from "react-icons/ci";
-import { IoInformationCircleOutline } from "react-icons/io5";
-import {
-  MdDelete
-} from "react-icons/md";
 import InputModel from "../components/InputModel";
 import { item, NewItemData, newItemSchema } from "../dto/itemDto";
 import {
@@ -28,13 +15,11 @@ import {
 } from "@/hooks/useItemData";
 import toast from "react-hot-toast";
 import TableFrame from "../components/TableFrame";
-import { useRouter } from "next/router";
+import { itemColumns } from "../components/itemsCompo/ItemColumnDef";
 const index = () => {
-  const router =useRouter();
   //state for handling input modal
   const [isCreate, setIsCreate] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [isShow, setIsShow] = useState<boolean>(false);
   //item id for edit
   const [editItemId, setEditItemId] = useState<string>("");
   //zod error handling state
@@ -83,7 +68,6 @@ const index = () => {
     setIsCreateItemModalOpen(false);
     setIsCreate(false);
     setIsEdit(false);
-    setIsShow(false);
   };
   //modal Open function
   const openCreateItemModal = () => {
@@ -190,7 +174,6 @@ const index = () => {
       closeCreateItemModal();
       setIsCreate(false);
       setIsEdit(false);
-      setIsShow(false);
       setEditItemData({
         name: "",
         manufacturer: "",
@@ -201,79 +184,7 @@ const index = () => {
     }
   };
   //column def using tanstak table
-  const columns: ColumnDef<item>[] = [
-    {
-      accessorKey: "id",
-      header: "ID",
-      cell: (info) => info.row.index + 1,
-    },
-    {
-      accessorKey: "name",
-      header: "Name",
-      cell: (info) => {
-        const name = info.getValue<string>();
-        return name.length > 10 ? `${name.slice(0, 10)}...` : name;
-      },
-    },
-    {
-      accessorKey: "manufacturer",
-      header: "Manufacturer",
-      cell: (info) => {
-        const manufacturer = info.getValue<string>();
-        return manufacturer.length > 10
-          ? `${manufacturer.slice(0, 10)}...`
-          : manufacturer;
-      },
-    },
-    {
-      accessorKey: "category",
-      header: "Category",
-      cell: (info) => {
-        const category = info.getValue<string>();
-        return category.length > 10 ? `${category.slice(0, 10)}...` : category;
-      },
-    },
-    {
-      accessorKey: "price",
-      header: "Price",
-      cell: (info) => {
-        const price = info.getValue<number>();
-        return price.toLocaleString("en-US") + " Ks";
-      },
-    },
-    {
-      accessorKey: "remark",
-      header: "Remark",
-      cell: (info) => {
-        const remark = info.getValue<string>();
-        return remark.length > 10 ? `${remark.slice(0, 10)}...` : remark;
-      },
-    },
-    {
-      accessorKey: "actions",
-      header: "Actions",
-      cell: (row) => (
-        <div className=" flex items-center justify-around">
-          <button
-            onClick={() => openEditItem(row.row.original.id)}
-            className=" p-3 hover:text-cyan-500"
-          >
-            <CiEdit />
-          </button>
-          <button
-          // handleShowItem(row.row.original.id)
-            onClick={() => router.push(`/items/${row.row.original.id}`) }
-            className=" p-3 hover:text-amber-400"
-          >
-            <IoInformationCircleOutline />
-          </button>
-          <button className=" p-3 hover:text-red-600">
-            <MdDelete onClick={() => handleDelete(row.row.original.id)} />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const columns = itemColumns(handleDelete, openEditItem);
   //function to get zod error msg for specific field
   const getErrorMessage = (field: string) => {
     const error = zodErrors.find((err) => err.path.includes(field));
@@ -285,93 +196,102 @@ const index = () => {
       <Layout>
         {/* <DetailComponent singleItem={singleItem}/> */}
         <InputModel
-          title={isCreate ? "Create Item" : isShow ? "Item" : ""}
+          title={isCreate ? "Create Item" : isEdit ? "Edit Item" : ""}
           isOpen={isCreateItemModalOpen}
           onClose={closeCreateItemModal}
         >
           {isCreate && (
             <form action="" onSubmit={(e) => handleCreate(newItemData, e)}>
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Item Name:
-                </label>
-                <input
-                  name="name"
-                  onChange={handleInputChange}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
-              </div>
-              {getErrorMessage("name") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("name")}
+              <div className=" mb-8">
+                <div className=" flex items-center justify-center m-4 ">
+                  <label htmlFor="" className=" w-[50%]">
+                    Item Name:
+                  </label>
+                  <input
+                    name="name"
+                    onChange={handleInputChange}
+                    type="text"
+                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                  />
                 </div>
-              )}
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Manufacturer:
-                </label>
-                <input
-                  name="manufacturer"
-                  onChange={handleInputChange}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
+                {getErrorMessage("name") && (
+                  <div className="text-red-600 text-center">
+                    {getErrorMessage("name")}
+                  </div>
+                )}
               </div>
-              {getErrorMessage("manufacturer") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("manufacturer")}
+              <div className="mb-8">
+                <div className=" flex items-center justify-center m-4 ">
+                  <label htmlFor="" className=" w-[50%]">
+                    Manufacturer:
+                  </label>
+                  <input
+                    name="manufacturer"
+                    onChange={handleInputChange}
+                    type="text"
+                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                  />
                 </div>
-              )}
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Category:
-                </label>
-                <input
-                  name="category"
-                  onChange={handleInputChange}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
+                {getErrorMessage("manufacturer") && (
+                  <div className="text-red-600 text-center ms-12">
+                    {getErrorMessage("manufacturer")}
+                  </div>
+                )}
               </div>
-              {getErrorMessage("category") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("category")}
+              <div  className="mb-8">
+                <div className=" flex items-center justify-center m-4 ">
+                  <label htmlFor="" className=" w-[50%]">
+                    Category:
+                  </label>
+                  <input
+                    name="category"
+                    onChange={handleInputChange}
+                    type="text"
+                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                  />
                 </div>
-              )}
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Price:
-                </label>
-                <input
-                  name="price"
-                  onChange={handleInputChange}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
+                {getErrorMessage("category") && (
+                  <div className="text-red-600 text-center ms-3">
+                    {getErrorMessage("category")}
+                  </div>
+                )}
               </div>
-              {getErrorMessage("price") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("price")}
+              <div  className="mb-8">
+                <div className=" flex items-center justify-center m-4 ">
+                  <label htmlFor="" className=" w-[50%]">
+                    Price:
+                  </label>
+                  <input
+                    name="price"
+                    onChange={handleInputChange}
+                    type="text"
+                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                  />
                 </div>
-              )}
-
-              <div className=" flex items-center justify-center m-4 ">
-                <label htmlFor="" className=" w-[50%]">
-                  Remark:
-                </label>
-                <input
-                  name="remark"
-                  onChange={handleInputChange}
-                  type="text"
-                  className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
-                />
+                {getErrorMessage("price") && (
+                  <div className="text-red-600 text-center ms-6">
+                    {getErrorMessage("price")}
+                  </div>
+                )}
               </div>
-              {getErrorMessage("remark") && (
-                <div className="text-red-600 text-center">
-                  {getErrorMessage("remark")}
+              <div  className="mb-8">
+                <div className=" flex items-center justify-center m-4 ">
+                  <label htmlFor="" className=" w-[50%]">
+                    Remark:
+                  </label>
+                  <input
+                    name="remark"
+                    onChange={handleInputChange}
+                    type="text"
+                    className="   px-10 py-2 bg-transparent border border-slate-500 rounded-2xl mx-2"
+                  />
                 </div>
-              )}
+                {getErrorMessage("remark") && (
+                  <div className="text-red-600  flex items-center justify-center">
+                    {getErrorMessage("remark")}
+                  </div>
+                )}
+              </div>
               <div className=" w-[100%]">
                 <button className=" border border-slate-400 hover:bg-slate-400  rounded-2xl   w-full py-4 my-3">
                   Create
@@ -379,7 +299,7 @@ const index = () => {
               </div>
             </form>
           )}
-      
+
           {isEdit && (
             <form
               action=""
@@ -481,7 +401,7 @@ const index = () => {
         </InputModel>
         <div className=" my-5">
           <div className=" my-3 flex item-center justify-center ">
-            <h1 className=" text-3xl  ">Items</h1>    
+            <h1 className=" text-3xl  ">Items</h1>
           </div>
           <div className="  flex items-center justify-center">
             <div className=" w-[75%]">
@@ -510,17 +430,16 @@ const index = () => {
               </div>
             </div>
           </div>
-       
-            <TableFrame
-              columns={columns}
-              itemData={itemData}
-              data={data}
-              page={page}
-              pageSize={pageSize}
-              setPage={setPage}
-            />
-          </div>
-     
+
+          <TableFrame
+            columns={columns}
+            itemData={itemData}
+            data={data}
+            page={page}
+            pageSize={pageSize}
+            setPage={setPage}
+          />
+        </div>
       </Layout>
     </div>
   );
