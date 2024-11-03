@@ -1,6 +1,7 @@
 //insert helper function to query data 
 
 import { DecodedToken, LoginData, LoginResponse } from "@/pages/dto/authDto";
+import { fetchData } from "@/pages/util/reqHelper";
 import { useMutation } from "@tanstack/react-query";
 import { setCookie } from "cookies-next";
 import { jwtDecode } from "jwt-decode";
@@ -84,7 +85,9 @@ export const useRegister = () => {
       const data = await response.json();
       return data;
     },
-
+    // mutationFn: async (loginData: LoginData) => {
+    //   return fetchData<LoginResponse>("/authentication/login", "POST", loginData,undefined,"Register failed");
+    // },
     onSuccess: (data) => {
       // Store the token in cookies
       // setCookie("token", data.token, { maxAge: 60 * 60 * 24 }); // Cookie valid for 1 day
