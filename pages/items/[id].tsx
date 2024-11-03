@@ -16,6 +16,8 @@ const handleButton=()=>{
         manufacturer: "",
         category: "",
         price: 0,
+        sale_price:0,
+        quantity:0,
         remark: "",
       });
   //tanstack query for get individual item
