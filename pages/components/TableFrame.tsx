@@ -27,7 +27,7 @@ const TableFrame = ({columns,itemData,data,page,pageSize,setPage}:TableArguments
                 <th
                   onClick={header.column.getToggleSortingHandler()}
                   key={header?.id}
-                  className=" border border-slate-400 p-6"
+                  className=" border border-slate-400 p-3"
                 >
                   {header.isPlaceholder ? null : (
                     <div>
@@ -56,7 +56,7 @@ const TableFrame = ({columns,itemData,data,page,pageSize,setPage}:TableArguments
                     return (
                       <td
                         key={cell?.id}
-                        className=" border border-slate-400 p-4"
+                        className=" border border-slate-400 p-2"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

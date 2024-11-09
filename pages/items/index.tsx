@@ -30,8 +30,7 @@ const index = () => {
     manufacturer: "",
     category: "",
     price: 0,
-    sale_price:0,
-    quantity:0,
+    sale_price: 0,
     remark: "",
   });
   //item data state for updating item
@@ -40,37 +39,17 @@ const index = () => {
     manufacturer: "",
     category: "",
     price: 0,
-    sale_price:0,
-    quantity:0,
+    sale_price: 0,
     remark: "",
   });
-  //input change handler
-  // const handleInputChange = (
-  //   e: ChangeEvent<HTMLInputElement>,
-  //   isEdit: boolean = false
-  // ) => {
-  //   const { name, value } = e.target;
-  //   if (isEdit) {
-  //     setEditItemData({
-  //       ...editItemData,
-  //       [name]: name === "price" ? Number(value) : value,
-  //     });
-  //   } else {
-  //     setNewItemData({
-  //       ...newItemData,
-  //       [name]: name === "price" ? Number(value) : value,
-  //     });
-  //   }
-  // };
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement>,
     isEdit: boolean = false
   ) => {
     const { name, value } = e.target;
-    const numericFields = ["price", "sale_price", "quantity"];
-  
+    const numericFields = ["price", "sale_price"];
     const updatedValue = numericFields.includes(name) ? Number(value) : value;
-  
     if (isEdit) {
       setEditItemData({
         ...editItemData,
@@ -83,7 +62,7 @@ const index = () => {
       });
     }
   };
-  
+
   //Modal state
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] =
     useState<boolean>(false);
@@ -105,7 +84,7 @@ const index = () => {
   //updating fetched data into state
   useEffect(() => {
     if (data) {
-      setItemData(data?.items)
+      setItemData(data?.items);
     }
   }, [data]);
   //tanstack query for delete
@@ -165,8 +144,7 @@ const index = () => {
         manufacturer: "",
         category: "",
         price: 0,
-        sale_price:0,
-        quantity:0,
+        sale_price: 0,
         remark: "",
       });
     }
@@ -176,17 +154,14 @@ const index = () => {
     const item = itemData.find((item) => item.id === id);
     if (item) {
       setEditItemId(item?.id);
-      setEditItemData(
-        {
-          name: item.name,
-          manufacturer: item.manufacturer,
-          category: item.category,
-          price: item.price,
-          sale_price:item.sale_price,
-          quantity:item.quantity,
-          remark: item.remark,
-        }
-      );
+      setEditItemData({
+        name: item.name,
+        manufacturer: item.manufacturer,
+        category: item.category,
+        price: item.price,
+        sale_price: item.sale_price,
+        remark: item.remark,
+      });
       setIsEdit(true);
       handleModel();
     }
@@ -202,7 +177,7 @@ const index = () => {
     e.preventDefault();
     const result = newItemSchema.safeParse(updatedItemData);
     console.log(updatedItemData);
-    
+
     if (!result.success) {
       setZodErrors(result.error.issues);
     } else {
@@ -215,8 +190,7 @@ const index = () => {
         manufacturer: "",
         category: "",
         price: 0,
-        sale_price:0,
-        quantity:0,
+        sale_price: 0,
         remark: "",
       });
     }
@@ -278,14 +252,6 @@ const index = () => {
               type: "text",
               onChange: (e) => handleInputChange(e, isEdit),
               error: getErrorMessage("sale_price"),
-            },
-            {
-              label: "Quantity",
-              name: "quantity",
-              value: isEdit ? editItemData.quantity : newItemData.quantity,
-              type: "text",
-              onChange: (e) => handleInputChange(e, isEdit),
-              error: getErrorMessage("quantity"),
             },
             {
               label: "Remark",

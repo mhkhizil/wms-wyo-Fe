@@ -1,7 +1,7 @@
 //insert helper function to query data 
 
 import { DecodedToken, LoginData, LoginResponse } from "@/pages/dto/authDto";
-import { fetchData } from "@/pages/util/reqHelper";
+import { apiRequest } from "@/pages/util/reqHelper";
 import { useMutation } from "@tanstack/react-query";
 import { setCookie } from "cookies-next";
 import { jwtDecode } from "jwt-decode";
@@ -10,22 +10,11 @@ import toast, { ToastBar } from "react-hot-toast";
 export const useLogin = () => {
   return useMutation({
     mutationFn: async (loginData: LoginData): Promise<LoginResponse> => {
-      const response = await fetch(
-        `https://api-wai.yethiha.com/authentication/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(loginData),
-        }
-      );
+      const data = await apiRequest("/authentication/login", {
+        method: "POST",
+        body: JSON.stringify(loginData),
+      });
 
-      if (!response.ok) {
-        throw new Error("User name or password invalid");
-      }
-
-      const data = await response.json();
       return data;
     },
 
@@ -67,22 +56,11 @@ export const useLogin = () => {
 export const useRegister = () => {
   return useMutation({
     mutationFn: async (registerData: LoginData): Promise<LoginResponse> => {
-      const response = await fetch(
-        `https://api-wai.yethiha.com/authentication/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(registerData),
-        }
-      );
+      const data = await apiRequest("/authentication/register", {
+        method: "POST",
+        body: JSON.stringify(registerData),
+      });
 
-      if (!response.ok) {
-        throw new Error("Register failed");
-      }
-
-      const data = await response.json();
       return data;
     },
     // mutationFn: async (loginData: LoginData) => {

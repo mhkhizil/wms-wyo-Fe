@@ -6,9 +6,12 @@ import { MdDelete } from "react-icons/md";
 import { useRouter } from "next/router";
 import { item } from "@/pages/dto/itemDto";
 
-export const itemColumns = (handleDelete: (id: string) => void, openEditItem: (id: string) => void) : ColumnDef<item>[] => {
+export const itemColumns = (
+  handleDelete: (id: string) => void,
+  openEditItem: (id: string) => void
+): ColumnDef<item>[] => {
   const router = useRouter();
-  return  [
+  return [
     {
       accessorKey: "id",
       header: "ID",
@@ -42,11 +45,21 @@ export const itemColumns = (handleDelete: (id: string) => void, openEditItem: (i
     },
     {
       accessorKey: "price",
-      header: "Price",
+      header: "Buy Price",
       cell: (info) => {
         const price = info.getValue<number>();
         return price.toLocaleString("en-US") + " Ks";
       },
+      
+    },
+    {
+      accessorKey: "sale_price",
+      header: "Sale Price",
+      cell: (info) => {
+        const price = info.getValue<number>();
+        return price.toLocaleString("en-US") + " Ks";
+      },
+      
     },
     {
       accessorKey: "remark",
@@ -76,6 +89,20 @@ export const itemColumns = (handleDelete: (id: string) => void, openEditItem: (i
           </button>
           <button className=" p-3 hover:text-red-600">
             <MdDelete onClick={() => handleDelete(row.row.original.id)} />
+          </button>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "history",
+      header: "History",
+      cell: (row) => (
+        <div className=" flex items-center justify-around">
+          <button className="  hover:bg-gray-500 p-2  rounded-2xl border border-1">
+            Sale
+          </button>
+          <button className="  hover:bg-green-500 p-2  rounded-2xl border border-1">
+            Buy
           </button>
         </div>
       ),

@@ -1,4 +1,5 @@
 import { item, itemList, NewItemData } from "@/pages/dto/itemDto";
+import { apiRequest } from "@/pages/util/reqHelper";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { error } from "console";
@@ -9,23 +10,7 @@ const token = getCookie("token");
 export const useGetAllItems = (page: number, limit: number) => {
   return useQuery<itemList, Error>({
     queryKey: ["items", page, limit],
-    queryFn: async () => {
-      const response = await fetch(
-        `https://api-wai.yethiha.com/items?limit=${limit}&page=${page}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch item data");
-      }
-
-      // Update data directly inside queryFn
-      return await response.json();
-    },
+    queryFn: () => apiRequest(`/items?limit=${limit}&page=${page}`),
 
     staleTime: 60000 * 1, // Keep data fresh for 5 minutes
     // refetchInterval:1000
@@ -33,21 +18,10 @@ export const useGetAllItems = (page: number, limit: number) => {
   });
 };
 //tanstack query for get individual item
-export const useGetItem = (itemId?: string |string[]) => {
+export const useGetItem = (itemId?: string | string[]) => {
   return useQuery<item, Error>({
     queryKey: ["item", itemId],
-    queryFn: async ({ queryKey }) => {
-      const [_, id] = queryKey;
-      const response = await fetch(`https://api-wai.yethiha.com/items/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch item data");
-      }
-      return await response.json();
-    },
+    queryFn: () => apiRequest(`/items/${itemId}`),
     staleTime: 60000,
     retry: 4,
     enabled: !!itemId, // Only run this query if itemId is not null
@@ -56,20 +30,8 @@ export const useGetItem = (itemId?: string |string[]) => {
 //tanstack query for delteing
 export const useDeleteItem = (queryClient: any) => {
   return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await fetch(`https://api-wai.yethiha.com/items/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`, // Add the auth token here
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete item");
-      }
-
-      return response;
-    },
+    mutationFn: (id: string) =>
+      apiRequest(`/items/${id}`, { method: "DELETE" }, false),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -101,22 +63,12 @@ export const useDeleteItem = (queryClient: any) => {
 };
 export const useCreateItem = (queryClient: any) => {
   return useMutation({
-    mutationFn: async (newItemData: NewItemData) => {
-      const response = await fetch(`https://api-wai.yethiha.com/items`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`, // Add the auth token here
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newItemData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create item");
-      }
-
-      return response;
-    },
+    mutationFn: (newItemData: NewItemData) =>
+      apiRequest(
+        `/items`,
+        { method: "POST", body: JSON.stringify(newItemData) },
+        false
+      ),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -148,29 +100,18 @@ export const useCreateItem = (queryClient: any) => {
 };
 export const useUpdateItem = (queryClient: any) => {
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       itemId,
       updatedItemData,
     }: {
       itemId: string;
       updatedItemData: NewItemData;
-    }) => {
-      const response = await fetch(
-        `https://api-wai.yethiha.com/items/${itemId}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedItemData),
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to update item");
-      }
-      return response;
-    },
+    }) =>
+      apiRequest(
+        `/items/${itemId}`,
+        { method: "PUT", body: JSON.stringify(updatedItemData) },
+        false
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["items"],

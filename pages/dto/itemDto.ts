@@ -7,7 +7,6 @@ export type item = {
   category: string;
   price: number;
   sale_price: number;
-  quantity: number;
   alert_on_qty: number;
   remark: string;
   buys: [];
@@ -23,7 +22,6 @@ export const newItemSchema = z.object({
   category: z.string().trim().min(1, "Category is required"),
   price: z.number().positive("Price must be positive"),
   sale_price: z.number().positive("Sale Price must be positive"),
-  quantity: z.number().positive("quantity must be positive"),
   remark: z.string().trim().min(1, "Remark is required"),
 });
 export type NewItemData = z.infer<typeof newItemSchema>;
